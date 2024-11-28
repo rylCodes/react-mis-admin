@@ -29,6 +29,7 @@ const CustomerList = () => {
 
   const [AddCustomerOpen, setAddCustomerOpen] = useState(false);
   const [updateCustomerOpen, setUpdateCustomerOpen] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
   const [customer, setCustomer] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
@@ -43,7 +44,12 @@ const CustomerList = () => {
   };
 
   const handleUpdateOpen = (customer) => {
-    setSelectedCustomer(customer);
+    const [firstname, ...lastname] = customer.name.split(" ");
+    setSelectedCustomer({
+      ...customer,
+      firstname,
+      lastname: lastname.join(" "),
+    });
     setUpdateCustomerOpen(true);
   };
 
@@ -97,6 +103,51 @@ const CustomerList = () => {
       }
     } catch (error) {
       console.error("Error fetching clients:", error);
+    }
+  };
+
+  // Update customer in the API
+  const handleUpdateCustomer = async () => {
+    try {
+      setIsFetching(true);
+      const response = await axios.post(
+        `http://localhost:8000/api/admin/update-client/${selectedCustomer.id}`,
+        {
+          firstname: selectedCustomer.firstname,
+          lastname: selectedCustomer.lastname,
+          email: selectedCustomer.email,
+          password: selectedCustomer.password, // Optional: Only if changing password
+          address: selectedCustomer.address,
+          gender: selectedCustomer.sex,
+          contact_no: selectedCustomer.contact,
+        }
+      );
+      if (response.status === 200) {
+        // Update local state after successful API update
+        const updatedCustomer = {
+          ...selectedCustomer,
+          fullname:
+            selectedCustomer.firstname + " " + selectedCustomer.lastname,
+          password: "", // empty password
+        };
+
+        setCustomer((prevCustomer) =>
+          prevCustomer.map((c) =>
+            c.id === selectedCustomer.id ? updatedCustomer : c
+          )
+        );
+
+        alert("Customer updated successfully");
+        handleUpdateClose();
+        setIsFetching(false);
+      } else {
+        alert("Failed to update the customer");
+        setIsFetching(false);
+      }
+    } catch (error) {
+      console.error("Error updating customer:", error);
+      setIsFetching(false);
+      alert("An error occurred while updating the customer");
     }
   };
 
@@ -215,33 +266,27 @@ const CustomerList = () => {
           <DialogContent>
             {selectedCustomer && (
               <Box component="form" mt={2}>
-                <FormControl fullWidth margin="normal">
-                  <InputLabel>Chosen Services</InputLabel>
-                  <Select
-                    value={selectedCustomer.chosenservices || ""}
-                    onChange={(e) =>
-                      setSelectedCustomer({
-                        ...selectedCustomer,
-                        chosenservices: e.target.value,
-                      })
-                    }
-                  >
-                    {serviceOptions.map((service) => (
-                      <MenuItem key={service} value={service}>
-                        {service}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
                 <TextField
                   fullWidth
-                  label="Full Name"
+                  label="First Name"
                   margin="normal"
-                  defaultValue={selectedCustomer.name}
+                  value={selectedCustomer.firstname}
                   onChange={(e) =>
                     setSelectedCustomer({
                       ...selectedCustomer,
-                      name: e.target.value,
+                      firstname: e.target.value,
+                    })
+                  }
+                />
+                <TextField
+                  fullWidth
+                  label="Last Name"
+                  margin="normal"
+                  value={selectedCustomer.lastname}
+                  onChange={(e) =>
+                    setSelectedCustomer({
+                      ...selectedCustomer,
+                      lastname: e.target.value,
                     })
                   }
                 />
@@ -249,7 +294,7 @@ const CustomerList = () => {
                   fullWidth
                   label="Email"
                   margin="normal"
-                  defaultValue={selectedCustomer.email}
+                  value={selectedCustomer.email}
                   onChange={(e) =>
                     setSelectedCustomer({
                       ...selectedCustomer,
@@ -257,12 +302,51 @@ const CustomerList = () => {
                     })
                   }
                 />
+                <TextField
+                  fullWidth
+                  label="Password"
+                  margin="normal"
+                  value={selectedCustomer.password}
+                  type="password"
+                  onChange={(e) =>
+                    setSelectedCustomer({
+                      ...selectedCustomer,
+                      password: e.target.value,
+                    })
+                  }
+                />
+                <TextField
+                  fullWidth
+                  label="Address"
+                  margin="normal"
+                  value={selectedCustomer.address}
+                  onChange={(e) =>
+                    setSelectedCustomer({
+                      ...selectedCustomer,
+                      address: e.target.value,
+                    })
+                  }
+                />
+                <TextField
+                  fullWidth
+                  label="Contact No"
+                  margin="normal"
+                  value={selectedCustomer.contact}
+                  onChange={(e) =>
+                    setSelectedCustomer({
+                      ...selectedCustomer,
+                      contact: e.target.value,
+                    })
+                  }
+                />
+
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={handleSubmit}
+                  onClick={handleUpdateCustomer}
+                  disabled={isFetching}
                 >
-                  Submit
+                  Save
                 </Button>
               </Box>
             )}
