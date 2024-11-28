@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Box,
@@ -25,11 +25,11 @@ import axios from "axios";
 const CustomerList = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   const [AddCustomerOpen, setAddCustomerOpen] = useState(false);
   const [updateCustomerOpen, setUpdateCustomerOpen] = useState(false);
-  const [customer, setCustomer] = useState(mockDataCustomer);
+  const [customer, setCustomer] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   const handleOpen = () => setAddCustomerOpen(true);
@@ -52,12 +52,11 @@ const CustomerList = () => {
     setUpdateCustomerOpen(false);
   };
 
- 
-
   const handleArchive = async (id) => {
     try {
+      // Archive by updating `is_active` to false
       const response = await axios.post(
-        "http://localhost:5000/api/archive-customer",
+        "http://localhost:8000/api/admin/show-client",
         { id }
       );
       if (response.status === 200) {
@@ -71,6 +70,39 @@ const CustomerList = () => {
       alert("An error occurred while archiving the customer.");
     }
   };
+
+  const fetchClients = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/admin/show-client"
+      );
+      console.log(response.data.data);
+      if (response.status === 200) {
+        const clients = response.data.data.map((client) => ({
+          id: client.id,
+          name: client.fullname,
+          sex: client.gender,
+          email: client.email,
+          contact: client.contact_no,
+          address: client.address,
+          chosenservices: client.chosen_services,
+          instructor: client.instructor,
+          plan: client.plan,
+          amount: client.amount,
+          isActive: client.is_active,
+        }));
+        setCustomer(clients);
+      } else {
+        console.error("Failed to fetch clients");
+      }
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
 
   const serviceOptions = [
     "Gym Per session",
@@ -87,7 +119,6 @@ const CustomerList = () => {
   ];
 
   const handleSubmit = () => {
-    // Pass the selected customer data to the PaymentForm page
     navigate("/payment-form", { state: { customer: selectedCustomer } });
   };
 
@@ -143,12 +174,16 @@ const CustomerList = () => {
             backgroundColor: colors.blueAccent[700],
             borderBottom: "none",
           },
-          "& .MuiDataGrid-virtualScroller": { backgroundColor: colors.primary[400] },
+          "& .MuiDataGrid-virtualScroller": {
+            backgroundColor: colors.primary[400],
+          },
           "& .MuiDataGrid-footerContainer": {
             borderTop: "none",
             backgroundColor: colors.blueAccent[700],
           },
-          "& .MuiCheckbox-root": { color: `${colors.greenAccent[200]} !important` },
+          "& .MuiCheckbox-root": {
+            color: `${colors.greenAccent[200]} !important`,
+          },
         }}
       >
         <Box display="flex" justifyContent="flex-end" mb="10px">
@@ -157,12 +192,25 @@ const CustomerList = () => {
           </Button>
         </Box>
         <DataGrid checkboxSelection rows={customer} columns={columns} />
-        <Dialog open={AddCustomerOpen} onClose={handleClose} fullWidth maxWidth="sm">
+        <Dialog
+          open={AddCustomerOpen}
+          onClose={handleClose}
+          fullWidth
+          maxWidth="sm"
+        >
           <DialogContent>
-            <AddCustomer closeModal={handleClose} onAddCustomer={handleAddCustomer} />
+            <AddCustomer
+              closeModal={handleClose}
+              onAddCustomer={handleAddCustomer}
+            />
           </DialogContent>
         </Dialog>
-        <Dialog open={updateCustomerOpen} onClose={handleUpdateClose} fullWidth maxWidth="sm">
+        <Dialog
+          open={updateCustomerOpen}
+          onClose={handleUpdateClose}
+          fullWidth
+          maxWidth="sm"
+        >
           <DialogTitle>Update Customer</DialogTitle>
           <DialogContent>
             {selectedCustomer && (
@@ -191,7 +239,10 @@ const CustomerList = () => {
                   margin="normal"
                   defaultValue={selectedCustomer.name}
                   onChange={(e) =>
-                    setSelectedCustomer({ ...selectedCustomer, name: e.target.value })
+                    setSelectedCustomer({
+                      ...selectedCustomer,
+                      name: e.target.value,
+                    })
                   }
                 />
                 <TextField
@@ -200,13 +251,16 @@ const CustomerList = () => {
                   margin="normal"
                   defaultValue={selectedCustomer.email}
                   onChange={(e) =>
-                    setSelectedCustomer({ ...selectedCustomer, email: e.target.value })
+                    setSelectedCustomer({
+                      ...selectedCustomer,
+                      email: e.target.value,
+                    })
                   }
                 />
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={handleSubmit} // Navigate to PaymentForm
+                  onClick={handleSubmit}
                 >
                   Submit
                 </Button>
