@@ -8,6 +8,7 @@ import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Topbar = () => {
   const theme = useTheme();
@@ -21,6 +22,32 @@ const Topbar = () => {
   // Open and close handlers
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
+
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      // Call the backend logout endpoint
+      await axios.post(
+        `http://localhost:8000/api/admin/logout`, // Backend logout route
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      );
+
+      // Clear session-related data (if any)
+      localStorage.removeItem("access_token");
+      sessionStorage.clear();
+
+      // Redirect to the login page or home page
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed", error);
+      alert("Error logging out. Please try again.");
+    }
+  };
 
   return (
     <Box display="flex" justifyContent="space-between" p={2}>
@@ -48,7 +75,6 @@ const Topbar = () => {
         <IconButton>
           <NotificationsOutlinedIcon />
         </IconButton>
-     
 
         {/* Profile Icon with Menu */}
         <IconButton onClick={handleMenuOpen}>
@@ -59,14 +85,22 @@ const Topbar = () => {
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
         >
-          <MenuItem onClick={() => {
-            handleMenuClose();
-            navigate('/profile');  // Replace '/profile' with the actual route for "My Profile"
-          }}>My Profile</MenuItem>
-          <MenuItem onClick={() => {
-            handleMenuClose();
-            navigate('/');  // Replace '/logout' with actual logout handling logic
-          }}>Logout</MenuItem>
+          <MenuItem
+            onClick={() => {
+              handleMenuClose();
+              navigate("/profile"); // Adjust to your profile route
+            }}
+          >
+            My Profile
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              handleMenuClose();
+              handleLogout(); // Trigger logout
+            }}
+          >
+            Logout
+          </MenuItem>
         </Menu>
       </Box>
     </Box>

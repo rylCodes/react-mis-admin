@@ -36,6 +36,8 @@ import PayrollList from "./scenes/payroll/payrollList.jsx";
 import PayrollForm from "./scenes/payroll/payrollForm.jsx";
 import AddPayrollForm from "./scenes/payroll/addPayrollForm.jsx";
 import PaymentForm from "./components/paymentForm.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import LoginRoute from "./components/LoginRoute.jsx";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -77,37 +79,189 @@ function ContentLayout({ isSidebar, setIsSidebar }) {
       <main className="content">
         {!hideSidebarAndTopbar && <Topbar setIsSidebar={setIsSidebar} />}
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <LoginRoute>
+                <Login />
+              </LoginRoute>
+            }
+          />
 
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/update" element={<Update />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/customer" element={<Customer />} />
-          <Route path="/customerarchive" element={<CustomerArchive />} />
-          <Route path="/daily" element={<Daily />} />
-          <Route path="/monthly" element={<Monthly />} />
-          <Route path="/employee" element={<Employee />} />
-          <Route path="/employeeAttendance" element={<EmployeeAttendance />} />
-          <Route path="/employeearchive" element={<EmployeeArchive />} />
-          <Route path="/inventoryform" element={<InventoryForm />} />
-          <Route path="/equipmentTable" element={<EquipmentTable />} />
-          <Route path="/inventory-table" element={<InventoryTable />} />
-          <Route path="/report" element={<Report />} />
-          <Route path="/payroll-list" element={<PayrollList />} />
-          <Route path="/payroll-form" element={<PayrollForm />} />
-          <Route path="/addpayroll-form" element={<AddPayrollForm />} />
+
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/customer"
+            element={
+              <ProtectedRoute>
+                <Customer />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/customerarchive"
+            element={
+              <ProtectedRoute>
+                <CustomerArchive />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/daily"
+            element={
+              <ProtectedRoute>
+                <Daily />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/monthly"
+            element={
+              <ProtectedRoute>
+                <Monthly />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee"
+            element={
+              <ProtectedRoute>
+                <Employee />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employeeAttendance"
+            element={
+              <ProtectedRoute>
+                <EmployeeAttendance />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employeearchive"
+            element={
+              <ProtectedRoute>
+                <EmployeeArchive />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/inventoryform"
+            element={
+              <ProtectedRoute>
+                <InventoryForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/equipmentTable"
+            element={
+              <ProtectedRoute>
+                <EquipmentTable />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/inventory-table"
+            element={
+              <ProtectedRoute>
+                <InventoryTable />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/report"
+            element={
+              <ProtectedRoute>
+                <Report />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payroll-list"
+            element={
+              <ProtectedRoute>
+                <PayrollList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payroll-form"
+            element={
+              <ProtectedRoute>
+                <PayrollForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/addpayroll-form"
+            element={
+              <ProtectedRoute>
+                <AddPayrollForm />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/salary-inclusionform"
-            element={<SalaryInclusionForm />}
+            element={
+              <ProtectedRoute>
+                <SalaryInclusionForm />
+              </ProtectedRoute>
+            }
           />
           <Route path="/payslip" element={<Payslip />} />
-          <Route path="/audittrail" element={<AuditTrail />} />
-          <Route path="/accountsettings" element={<AccountSettings />} />
-          <Route path="/backandrestore" element={<BackupAndRestore />} />
-          <Route path="/systemvariable" element={<SystemVariable />} />
+          <Route
+            path="/audittrail"
+            element={
+              <ProtectedRoute>
+                <AuditTrail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/accountsettings"
+            element={
+              <ProtectedRoute>
+                <AccountSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/backandrestore"
+            element={
+              <ProtectedRoute>
+                <BackupAndRestore />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/systemvariable"
+            element={
+              <ProtectedRoute>
+                <SystemVariable />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/payment-receipt" element={<PaymentReceipt />} />
-          <Route path="/payment-form" element={<PaymentForm />} />
+          <Route
+            path="/payment-form"
+            element={
+              <ProtectedRoute>
+                <PaymentForm />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
     </>
