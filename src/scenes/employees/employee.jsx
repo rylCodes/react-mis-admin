@@ -1,8 +1,20 @@
 import { useState, useEffect } from "react";
-import { Box, useTheme, Button, Dialog, DialogContent } from "@mui/material";
+import {
+  Box,
+  useTheme,
+  Button,
+  Dialog,
+  DialogContent,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddEmployee from "./AddEmployee";
 import Header from "../../components/Header";
 import axios from "axios"; // For API requests
@@ -12,35 +24,77 @@ const Employee = () => {
   const colors = tokens(theme.palette.mode);
 
   const [AddEmployeeOpen, setAddEmployeeOpen] = useState(false);
+  const [EditEmployeeOpen, setEditEmployeeOpen] = useState(false);
   const [employees, setEmployees] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+  const [positions, setPositions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/admin/show-staff"
+      );
+      const formattedData = response.data.data.map((staff) => ({
+        id: staff.id,
+        name: staff.fullname,
+        email: staff.email,
+        sex: staff.gender,
+        phone: staff.contact_no || "N/A",
+        address: staff.address,
+        position: staff.position,
+      }));
+      setEmployees(formattedData);
+    } catch (error) {
+      console.error("Failed to fetch employees:", error);
+    }
+  };
+
+  const fetchPositions = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/admin/show-position"
+      );
+      setPositions(response.data.data);
+    } catch (error) {
+      console.error("Error fetching positions:", error);
+    }
+  };
 
   // Fetch employees from the backend
   useEffect(() => {
-    const fetchEmployees = async () => {
+    const initializeData = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8000/api/admin/show-staff"
-        );
-        const formattedData = response.data.data.map((staff) => ({
-          id: staff.id,
-          name: staff.fullname,
-          email: staff.email,
-          sex: staff.gender,
-          phone: staff.contact_no || "N/A", // Handle null values
-          address: staff.address,
-          position: staff.position,
-        }));
-        setEmployees(formattedData);
+        await fetchPositions();
+        await fetchEmployees();
+        setLoading(false);
       } catch (error) {
-        console.error("Failed to fetch employees:", error);
+        console.error("Error", error);
+        setLoading(false);
       }
     };
 
-    fetchEmployees();
+    initializeData();
   }, []);
 
   const handleOpen = () => setAddEmployeeOpen(true);
   const handleClose = () => setAddEmployeeOpen(false);
+
+  const handleEditOpen = (employee) => {
+    console.log(employee);
+    console.log("positions", positions);
+    const [firstname, ...lastname] = employee.name.split(" ");
+    setSelectedEmployee({
+      ...employee,
+      firstname,
+      lastname: lastname.join(" "),
+      gender: employee.sex,
+    });
+    console.log(selectedEmployee);
+    setEditEmployeeOpen(true);
+  };
+  const handleEditClose = () => setEditEmployeeOpen(false);
 
   const handleAddEmployee = (newEmployee) => {
     // Add new employee to the state (consider adding an API call here)
@@ -55,6 +109,59 @@ const Employee = () => {
     setEmployees((prevEmployees) =>
       prevEmployees.filter((employee) => employee.id !== id)
     );
+  };
+
+  const handleUpdateEmployee = async () => {
+    try {
+      const position = positions.find(
+        (position) => position.name === selectedEmployee.position
+      );
+
+      const response = await axios.post(
+        `http://localhost:8000/api/admin/update-staff/${selectedEmployee.id}`,
+        {
+          position_id: position ? position.id : null,
+          firstname: selectedEmployee.firstname,
+          lastname: selectedEmployee.lastname,
+          email: selectedEmployee.email,
+          password: selectedEmployee.password,
+          address: selectedEmployee.address,
+          gender: selectedEmployee.gender,
+          contact_no: selectedEmployee.phone,
+        }
+      );
+      setEmployees((prevEmployees) =>
+        prevEmployees.map((employee) =>
+          employee.id === selectedEmployee.id ? response.data.data : employee
+        )
+      );
+      handleEditClose();
+
+      if (response.status === 200) {
+        // Update local state after successful API update
+        const updatedEmployees = {
+          ...selectedEmployee,
+          name: selectedEmployee.firstname + " " + selectedEmployee.lastname,
+          sex: selectedEmployee.gender,
+          password: "",
+        };
+
+        setEmployees((prevEmployees) =>
+          prevEmployees.map((e) =>
+            e.id === selectedEmployee.id ? updatedEmployees : e
+          )
+        );
+
+        alert("Employee updated successfully");
+        handleEditClose();
+        setIsFetching(false);
+      } else {
+        alert("Failed to update the customer");
+        setIsFetching(false);
+      }
+    } catch (error) {
+      console.error("Failed to update employee:", error);
+    }
   };
 
   const columns = [
@@ -79,6 +186,14 @@ const Employee = () => {
             onClick={() => handleArchive(params.row.id)}
           >
             Archive
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            startIcon={<EditOutlinedIcon />}
+            onClick={() => handleEditOpen(params.row)}
+          >
+            Edit
           </Button>
         </Box>
       ),
@@ -135,7 +250,131 @@ const Employee = () => {
             <AddEmployee
               closeModal={handleClose}
               onAddEmployee={handleAddEmployee}
+              loading={loading}
+              positions={positions}
             />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={EditEmployeeOpen}
+          onClose={handleEditClose}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogContent>
+            {selectedEmployee && (
+              <Box display="flex" flexDirection="column" gap="10px">
+                <TextField
+                  label="First Name"
+                  value={selectedEmployee.firstname}
+                  onChange={(e) =>
+                    setSelectedEmployee({
+                      ...selectedEmployee,
+                      firstname: e.target.value,
+                    })
+                  }
+                />
+                <TextField
+                  label="Last Name"
+                  value={selectedEmployee.lastname}
+                  onChange={(e) =>
+                    setSelectedEmployee({
+                      ...selectedEmployee,
+                      lastname: e.target.value,
+                    })
+                  }
+                />
+                <TextField
+                  label="Email"
+                  value={selectedEmployee.email}
+                  onChange={(e) =>
+                    setSelectedEmployee({
+                      ...selectedEmployee,
+                      email: e.target.value,
+                    })
+                  }
+                />
+                <TextField
+                  label="Password"
+                  type="password"
+                  value={selectedEmployee.password}
+                  onChange={(e) =>
+                    setSelectedEmployee({
+                      ...selectedEmployee,
+                      password: e.target.value,
+                    })
+                  }
+                />
+                <TextField
+                  label="Address"
+                  value={selectedEmployee.address}
+                  onChange={(e) =>
+                    setSelectedEmployee({
+                      ...selectedEmployee,
+                      address: e.target.value,
+                    })
+                  }
+                />
+                <TextField
+                  label="Contact No"
+                  value={selectedEmployee.phone}
+                  onChange={(e) =>
+                    setSelectedEmployee({
+                      ...selectedEmployee,
+                      phone: e.target.value,
+                    })
+                  }
+                />
+                <FormControl required>
+                  <InputLabel>Gender</InputLabel>
+                  <Select
+                    label="Gender"
+                    name="gender"
+                    value={selectedEmployee.gender}
+                    onChange={(e) =>
+                      setSelectedEmployee({
+                        ...selectedEmployee,
+                        gender: e.target.value,
+                      })
+                    }
+                  >
+                    <MenuItem value="male">Male</MenuItem>
+                    <MenuItem value="female">Female</MenuItem>
+                    <MenuItem value="other">Other</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControl required>
+                  <InputLabel>Position</InputLabel>
+                  <Select
+                    label="Position"
+                    name="position"
+                    value={selectedEmployee.position}
+                    onChange={(e) =>
+                      setSelectedEmployee({
+                        ...selectedEmployee,
+                        position: e.target.value,
+                      })
+                    }
+                    disabled={loading || positions.length === 0}
+                  >
+                    {positions.map((position) => (
+                      <MenuItem key={position.id} value={position.name}>
+                        {position.name}{" "}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleUpdateEmployee}
+                >
+                  Update Employee
+                </Button>
+              </Box>
+            )}
           </DialogContent>
         </Dialog>
       </Box>

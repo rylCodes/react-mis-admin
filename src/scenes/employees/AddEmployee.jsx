@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 
-const AddEmployee = ({ closeModal, onAddEmployee }) => {
+const AddEmployee = ({ closeModal, onAddEmployee, loading, positions }) => {
   const [employeeData, setEmployeeData] = useState({
     firstname: "",
     lastname: "",
@@ -21,29 +21,6 @@ const AddEmployee = ({ closeModal, onAddEmployee }) => {
     position_id: "",
     password: "defaultPassword123", // Default password (you can generate this dynamically if needed)
   });
-
-  const [positions, setPositions] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  // Fetch positions from the backend
-  useEffect(() => {
-    const fetchPositions = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          "http://localhost:8000/api/admin/show-position"
-        );
-        setPositions(response.data.data); // Assuming data is in the `data` field of the response
-      } catch (error) {
-        console.error("Error fetching positions:", error);
-        alert("Failed to fetch positions. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPositions();
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
