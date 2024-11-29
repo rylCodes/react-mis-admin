@@ -16,44 +16,7 @@ import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-
-const initialEquipmentData = [
-  {
-    id: 1,
-    name: "Vitamin Powder",
-    picture: "https://via.placeholder.com/100",
-    stockLevel: 5,
-    description: "Premium vitamin powder for energy boosting.",
-  },
-  {
-    id: 2,
-    name: "Softdrinks",
-    picture: "https://via.placeholder.com/100",
-    stockLevel: 20,
-    description: "Assorted soft drinks for post-workout refreshments.",
-  },
-  {
-    id: 3,
-    name: "Soya",
-    picture: "https://via.placeholder.com/100",
-    stockLevel: 2,
-    description: "High-protein soy beverage.",
-  },
-  {
-    id: 4,
-    name: "Mineral Water",
-    picture: "https://via.placeholder.com/100",
-    stockLevel: 8,
-    description: null,
-  },
-  {
-    id: 5,
-    name: "Energy Drink",
-    picture: "https://via.placeholder.com/100",
-    stockLevel: 2,
-    description: "Energy drink to recharge during workouts.",
-  },
-];
+import axios from "axios";
 
 const InventoryTable = () => {
   const theme = useTheme();
@@ -62,13 +25,31 @@ const InventoryTable = () => {
   const { authToken } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const [inventoryData, setInventoryData] = useState([]);
+
   useEffect(() => {
     if (!authToken) {
       navigate("/");
+    } else {
+      const fetchInventoryData = async () => {
+        try {
+          const response = await axios.get(
+            "http://localhost:8000/api/admin/show-inventory",
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
+          );
+          setInventoryData(response.data.data);
+        } catch (error) {
+          console.error("Error fetching inventory data:", error);
+        }
+      };
+
+      fetchInventoryData();
     }
   }, [authToken, navigate]);
-
-  const [equipmentData] = useState(initialEquipmentData);
 
   const handleEdit = (id) => {
     alert(`Editing equipment with ID: ${id}`);
@@ -103,17 +84,20 @@ const InventoryTable = () => {
                 <b>Description</b>
               </TableCell>
               <TableCell>
+                <b>Unit Price</b>
+              </TableCell>
+              <TableCell>
                 <b>Action</b>
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {equipmentData.map((equipment) => (
+            {inventoryData.map((equipment) => (
               <TableRow key={equipment.id}>
                 <TableCell>{equipment.name}</TableCell>
                 <TableCell>
                   <img
-                    src={equipment.picture}
+                    src={equipment.picture || "https://via.placeholder.com/100"}
                     alt={equipment.name}
                     style={{
                       width: "100px",
@@ -125,19 +109,20 @@ const InventoryTable = () => {
                 </TableCell>
                 <TableCell
                   sx={{
-                    color: getStockLevelColor(equipment.stockLevel),
+                    color: getStockLevelColor(equipment.quantity),
                     fontWeight: "bold",
                   }}
                 >
-                  {equipment.stockLevel}
+                  {equipment.quantity}
                 </TableCell>
                 <TableCell>
-                  {equipment.description || (
+                  {equipment.short_description || (
                     <i style={{ color: colors.grey[500] }}>
                       No description available
                     </i>
                   )}
                 </TableCell>
+                <TableCell>{equipment.price}</TableCell>
                 <TableCell>
                   <Tooltip title="Edit this equipment" arrow>
                     <Button
