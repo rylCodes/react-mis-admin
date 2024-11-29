@@ -1,31 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Box, useTheme, Button, Dialog, DialogContent } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined';
-import { mockDataEmployee } from "../../data/mockData";
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import AddEmployee from "./AddEmployee";
 import Header from "../../components/Header";
+import axios from "axios"; // For API requests
 
 const Employee = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const [AddEmployeeOpen, setAddEmployeeOpen] = useState(false);
-  const [employees, setEmployees] = useState(mockDataEmployee);
+  const [employees, setEmployees] = useState([]);
+
+  // Fetch employees from the backend
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8000/api/admin/show-staff"
+        );
+        const formattedData = response.data.data.map((staff) => ({
+          id: staff.id,
+          name: staff.fullname,
+          email: staff.email,
+          sex: staff.gender,
+          phone: staff.contact_no || "N/A", // Handle null values
+          address: staff.address,
+          position: staff.position,
+        }));
+        setEmployees(formattedData);
+      } catch (error) {
+        console.error("Failed to fetch employees:", error);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
 
   const handleOpen = () => setAddEmployeeOpen(true);
   const handleClose = () => setAddEmployeeOpen(false);
 
   const handleAddEmployee = (newEmployee) => {
+    // Add new employee to the state (consider adding an API call here)
     setEmployees((prevEmployees) => [
       ...prevEmployees,
-      { id: prevEmployees.length + 1, ...newEmployee }, // Adding new employee data
+      { id: prevEmployees.length + 1, ...newEmployee },
     ]);
   };
 
   const handleArchive = (id) => {
-    // Delete employee logic
+    // Archive employee logic
     setEmployees((prevEmployees) =>
       prevEmployees.filter((employee) => employee.id !== id)
     );
@@ -48,8 +74,8 @@ const Employee = () => {
         <Box display="flex" gap="9px" justifyContent="center">
           <Button
             variant="outlined"
-            color="#f5f5f5"
-            startIcon={<ArchiveOutlinedIcon/>}
+            color="primary"
+            startIcon={<ArchiveOutlinedIcon />}
             onClick={() => handleArchive(params.row.id)}
           >
             Archive
@@ -99,7 +125,12 @@ const Employee = () => {
 
         <DataGrid checkboxSelection rows={employees} columns={columns} />
 
-        <Dialog open={AddEmployeeOpen} onClose={handleClose} fullWidth maxWidth="sm">
+        <Dialog
+          open={AddEmployeeOpen}
+          onClose={handleClose}
+          fullWidth
+          maxWidth="sm"
+        >
           <DialogContent>
             <AddEmployee
               closeModal={handleClose}
