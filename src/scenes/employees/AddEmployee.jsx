@@ -1,17 +1,49 @@
-import { useState } from "react";
-import { TextField, Button, Box, MenuItem, Select, InputLabel, FormControl } from "@mui/material";
+import { useState, useEffect } from "react";
+import {
+  TextField,
+  Button,
+  Box,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
+import axios from "axios";
 
 const AddEmployee = ({ closeModal, onAddEmployee }) => {
   const [employeeData, setEmployeeData] = useState({
-    name: "",
-    sex: "",
-    phone: "",
+    firstname: "",
+    lastname: "",
+    gender: "",
+    contact_no: "",
     email: "",
     address: "",
-    position: "",
-    joined: "",
-    action: ""
+    position_id: "",
+    password: "defaultPassword123", // Default password (you can generate this dynamically if needed)
   });
+
+  const [positions, setPositions] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch positions from the backend
+  useEffect(() => {
+    const fetchPositions = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          "http://localhost:8000/api/admin/show-position"
+        );
+        setPositions(response.data.data); // Assuming data is in the `data` field of the response
+      } catch (error) {
+        console.error("Error fetching positions:", error);
+        alert("Failed to fetch positions. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPositions();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,29 +53,49 @@ const AddEmployee = ({ closeModal, onAddEmployee }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would usually send a POST request to your backend
-    // For now, let's just log the data
-    onAddEmployee(employeeData);
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/admin/store-staff",
+        employeeData
+      );
 
-    // Close the modal after submitting
-    closeModal();
+      if (response.status === 201) {
+        onAddEmployee(response.data.data); // Pass the new staff to the parent component
+        alert(response.data.message || "Employee added successfully!");
+        closeModal(); // Close the modal
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred while adding the employee. Please try again.");
+    }
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{ display: "flex", flexDirection: "column", gap: "10px" }}
+    >
       <TextField
-        label="Name"
-        name="name"
-        value={employeeData.name}
+        label="First Name"
+        name="firstname"
+        value={employeeData.firstname}
         onChange={handleChange}
         required
       />
       <TextField
-        label="Phone Number"
-        name="phone"
-        value={employeeData.phone}
+        label="Last Name"
+        name="lastname"
+        value={employeeData.lastname}
+        onChange={handleChange}
+        required
+      />
+      <TextField
+        label="Contact Number"
+        name="contact_no"
+        value={employeeData.contact_no}
         onChange={handleChange}
         required
       />
@@ -74,14 +126,14 @@ const AddEmployee = ({ closeModal, onAddEmployee }) => {
       <FormControl required>
         <InputLabel>Gender</InputLabel>
         <Select
-          label="Sex"
-          name="sex"
+          label="Gender"
+          name="gender"
           value={employeeData.gender}
           onChange={handleChange}
         >
-          <MenuItem value="Male">Male</MenuItem>
-          <MenuItem value="Female">Female</MenuItem>
-          <MenuItem value="Other">Other</MenuItem>
+          <MenuItem value="male">Male</MenuItem>
+          <MenuItem value="female">Female</MenuItem>
+          <MenuItem value="other">Other</MenuItem>
         </Select>
       </FormControl>
 
@@ -89,18 +141,27 @@ const AddEmployee = ({ closeModal, onAddEmployee }) => {
         <InputLabel>Position</InputLabel>
         <Select
           label="Position"
-          name="position"
-          value={employeeData.position}
+          name="position_id"
+          value={employeeData.position_id}
           onChange={handleChange}
+          disabled={loading || positions.length === 0}
         >
-          <MenuItem value="Cashier">Cashier</MenuItem>
-          <MenuItem value="Admin">Admin</MenuItem>
-          <MenuItem value="Instructor">Instructor</MenuItem>
+          {positions.map((position) => (
+            <MenuItem key={position.id} value={position.id}>
+              {position.name}{" "}
+              {/* Adjust `position.name` if the field name is different */}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
-      <Button type="submit" variant="contained" color="primary">
-        Add Employee
+      <Button
+        type="submit"
+        variant="contained"
+        color="primary"
+        disabled={loading}
+      >
+        {loading ? "Loading..." : "Add Employee"}
       </Button>
     </Box>
   );
