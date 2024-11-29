@@ -1,10 +1,33 @@
-import React, { useState } from 'react';
-import { useTheme, Container, FormControl, InputLabel, Select, MenuItem, TextField, Button, Grid, FormHelperText, Box } from '@mui/material';
+import React, { useContext, useEffect, useState } from "react";
+import {
+  useTheme,
+  Container,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Button,
+  Grid,
+  FormHelperText,
+  Box,
+} from "@mui/material";
 import { tokens } from "../theme";
+import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const ForgotPassword = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const { authToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
 
   const questions = [
     "What is your favorite color?",
@@ -13,14 +36,14 @@ const ForgotPassword = () => {
   ];
 
   const [selectedQuestions, setSelectedQuestions] = useState({
-    question1: '',
-    question2: '',
-    question3: ''
+    question1: "",
+    question2: "",
+    question3: "",
   });
   const [answers, setAnswers] = useState({
-    answer1: '',
-    answer2: '',
-    answer3: ''
+    answer1: "",
+    answer2: "",
+    answer3: "",
   });
   const [error, setError] = useState(false); // State to manage error handling
 
@@ -39,11 +62,16 @@ const ForgotPassword = () => {
   };
 
   const handleConfirm = () => {
-    if (Object.values(selectedQuestions).every(q => q) && Object.values(answers).every(a => a)) {
+    if (
+      Object.values(selectedQuestions).every((q) => q) &&
+      Object.values(answers).every((a) => a)
+    ) {
       // Simulate answering correctly
-      alert(`Questions and Answers:\n1. ${selectedQuestions.question1}: ${answers.answer1}\n2. ${selectedQuestions.question2}: ${answers.answer2}\n3. ${selectedQuestions.question3}: ${answers.answer3}`);
+      alert(
+        `Questions and Answers:\n1. ${selectedQuestions.question1}: ${answers.answer1}\n2. ${selectedQuestions.question2}: ${answers.answer2}\n3. ${selectedQuestions.question3}: ${answers.answer3}`
+      );
       // Redirect to the password reset page
-      window.location.href = "/change-password";  // Redirect to reset password page
+      window.location.href = "/change-password"; // Redirect to reset password page
     } else {
       setError(true); // Trigger error state if some fields are empty
     }
@@ -51,55 +79,67 @@ const ForgotPassword = () => {
 
   const handleCancel = () => {
     setSelectedQuestions({
-      question1: '',
-      question2: '',
-      question3: ''
+      question1: "",
+      question2: "",
+      question3: "",
     });
     setAnswers({
-      answer1: '',
-      answer2: '',
-      answer3: ''
+      answer1: "",
+      answer2: "",
+      answer3: "",
     });
     setError(false);
   };
 
   const getAvailableQuestions = (selectedKey) => {
-    return questions.filter(q => !Object.values(selectedQuestions).includes(q) || selectedQuestions[selectedKey] === q);
+    return questions.filter(
+      (q) =>
+        !Object.values(selectedQuestions).includes(q) ||
+        selectedQuestions[selectedKey] === q
+    );
   };
 
   return (
-    <Container 
-      maxWidth="sm" 
-      sx={{ 
-        marginTop: 5, 
+    <Container
+      maxWidth="sm"
+      sx={{
+        marginTop: 5,
         backgroundColor: colors.primary[400], // Light background color
-        padding: 3, 
+        padding: 3,
         borderRadius: 2,
-        boxShadow: 3, 
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        boxShadow: 3,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
     >
-      <Box sx={{ textAlign: 'center', marginBottom: 4 }}>
+      <Box sx={{ textAlign: "center", marginBottom: 4 }}>
         <h2>Forgot Password</h2>
         <p>Answer the following security questions to proceed.</p>
       </Box>
 
       <Grid container spacing={2}>
-        {['question1', 'question2', 'question3'].map((questionKey, index) => (
+        {["question1", "question2", "question3"].map((questionKey, index) => (
           <Grid item xs={12} key={questionKey}>
-            <FormControl fullWidth margin="normal" error={error && !selectedQuestions[questionKey]}>
+            <FormControl
+              fullWidth
+              margin="normal"
+              error={error && !selectedQuestions[questionKey]}
+            >
               <InputLabel>Question {index + 1}</InputLabel>
               <Select
                 value={selectedQuestions[questionKey]}
                 onChange={(e) => handleQuestionChange(e, questionKey)}
               >
                 {getAvailableQuestions(questionKey).map((q, i) => (
-                  <MenuItem value={q} key={i}>{q}</MenuItem>
+                  <MenuItem value={q} key={i}>
+                    {q}
+                  </MenuItem>
                 ))}
               </Select>
               {error && !selectedQuestions[questionKey] && (
-                <FormHelperText>Question {index + 1} is required</FormHelperText>
+                <FormHelperText>
+                  Question {index + 1} is required
+                </FormHelperText>
               )}
             </FormControl>
 
@@ -110,7 +150,11 @@ const ForgotPassword = () => {
               value={answers[`answer${index + 1}`]}
               onChange={(e) => handleAnswerChange(e, `answer${index + 1}`)}
               error={error && !answers[`answer${index + 1}`]}
-              helperText={error && !answers[`answer${index + 1}`] ? "Answer is required" : ""}
+              helperText={
+                error && !answers[`answer${index + 1}`]
+                  ? "Answer is required"
+                  : ""
+              }
             />
           </Grid>
         ))}
@@ -122,7 +166,7 @@ const ForgotPassword = () => {
             variant="contained"
             color="primary"
             onClick={handleConfirm}
-            sx={{ width: '100%' }}
+            sx={{ width: "100%" }}
           >
             Confirm
           </Button>
@@ -132,7 +176,7 @@ const ForgotPassword = () => {
             variant="outlined"
             color="secondary"
             onClick={handleCancel}
-            sx={{ width: '100%' }}
+            sx={{ width: "100%" }}
           >
             Cancel
           </Button>

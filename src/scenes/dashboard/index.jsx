@@ -10,7 +10,7 @@ import BarChart from "../../components/BarChart";
 import StatBox from "../../components/StatBox";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 
 const Dashboard = () => {
   const theme = useTheme();
