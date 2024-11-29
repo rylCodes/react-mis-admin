@@ -8,11 +8,16 @@ import {
   Tabs,
   Tab,
   useTheme,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const InventoryForm = () => {
   const theme = useTheme();
@@ -29,11 +34,11 @@ const InventoryForm = () => {
 
   const [tabValue, setTabValue] = useState(0);
   const [formData, setFormData] = useState({
-    itemNumber: "",
-    productId: "",
-    itemName: "",
-    quantity: "",
-    unitPrice: "",
+    name: "",
+    type: "",
+    short_description: "",
+    quantity: 0,
+    price: 0,
   });
 
   const handleTabChange = (event, newValue) => {
@@ -48,19 +53,34 @@ const InventoryForm = () => {
     });
   };
 
-  const handleSubmit = () => {
-    console.log("Form Data Submitted:", formData);
-    // Add logic to submit form data (e.g., API call)
+  const handleSubmit = async () => {
+    console.log("Form Data to be submitted:", formData); // Log the form data
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/admin/store-inventory",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      console.log("Inventory created successfully:", response.data);
+      handleClear();
+      alert("Inventory created successfully");
+    } catch (error) {
+      console.error("Error creating inventory:", error);
+    }
   };
 
   const handleClear = () => {
-    setFormData({
-      itemNumber: "",
-      productId: "",
-      itemName: "",
-      quantity: "",
-      unitPrice: "",
-    });
+    setFormData((prevData) => ({
+      name: "",
+      type: "",
+      short_description: "",
+      quantity: 0,
+      price: 0,
+    }));
   };
 
   return (
@@ -80,55 +100,63 @@ const InventoryForm = () => {
             <Grid container spacing={2} mb={2}>
               <Grid item xs={6}>
                 <TextField
-                  label="Item Number"
-                  name="itemNumber"
-                  value={formData.itemNumber}
+                  label="Name"
+                  name="name"
+                  value={formData.name}
                   onChange={handleInputChange}
                   fullWidth
+                  required
                 />
               </Grid>
               <Grid item xs={6}>
-                <TextField
-                  label="Product ID"
-                  name="productId"
-                  value={formData.productId}
-                  onChange={handleInputChange}
-                  fullWidth
-                />
+                <FormControl required fullWidth={true}>
+                  <InputLabel>Type</InputLabel>
+                  <Select
+                    label="Type"
+                    name="type"
+                    value={formData.type}
+                    onChange={handleInputChange}
+                  >
+                    <MenuItem value="equipment">Equipment</MenuItem>
+                    <MenuItem value="supplement">Supplement</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
             </Grid>
-            <TextField
-              label="Item Name"
-              name="itemName"
-              value={formData.itemName}
-              onChange={handleInputChange}
-              fullWidth
-              mb={2}
-            />
-            <TextField
-              label="Description"
-              multiline
-              rows={4}
-              fullWidth
-              mb={2}
-            />
+            <Grid container mb={2}>
+              <TextField
+                label="Description"
+                name="short_description"
+                value={formData.short_description}
+                onChange={handleInputChange}
+                fullWidth
+                multiline
+                rows={4}
+                mb={2}
+                required
+              />
+            </Grid>
             <Grid container spacing={2} mb={2}>
               <Grid item xs={6}>
                 <TextField
-                  label="Quantity"
+                  label="Stock Level"
                   name="quantity"
                   value={formData.quantity}
+                  type="number"
                   onChange={handleInputChange}
                   fullWidth
+                  required
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
                   label="Unit Price"
-                  name="unitPrice"
-                  value={formData.unitPrice}
+                  name="price"
+                  value={formData.price}
+                  type="number"
                   onChange={handleInputChange}
                   fullWidth
+                  required
                 />
               </Grid>
             </Grid>
@@ -139,7 +167,7 @@ const InventoryForm = () => {
                 onClick={handleSubmit}
                 sx={{ mr: 2 }}
               >
-                Update
+                Submit
               </Button>
               <Button
                 variant="outlined"
