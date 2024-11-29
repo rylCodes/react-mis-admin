@@ -21,11 +21,19 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import AddCustomer from "./addCustomer";
 import axios from "axios";
+import { AuthContext } from "../../context/AuthContext";
 
 const CustomerList = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const { authToken } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
 
   const [AddCustomerOpen, setAddCustomerOpen] = useState(false);
   const [updateCustomerOpen, setUpdateCustomerOpen] = useState(false);

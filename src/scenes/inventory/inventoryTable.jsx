@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Table,
@@ -14,6 +14,8 @@ import {
 } from "@mui/material";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
+import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const initialEquipmentData = [
   {
@@ -57,6 +59,15 @@ const InventoryTable = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  const { authToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
+
   const [equipmentData] = useState(initialEquipmentData);
 
   const handleEdit = (id) => {
@@ -72,15 +83,28 @@ const InventoryTable = () => {
   return (
     <Box sx={{ padding: 3 }}>
       <Header title="Inventory" subtitle="Manage Discounts and Packages" />
-      <TableContainer component={Paper} sx={{ backgroundColor: colors.primary[400] }}>
+      <TableContainer
+        component={Paper}
+        sx={{ backgroundColor: colors.primary[400] }}
+      >
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell><b>Name</b></TableCell>
-              <TableCell><b>Picture</b></TableCell>
-              <TableCell><b>Stock Level</b></TableCell>
-              <TableCell><b>Description</b></TableCell>
-              <TableCell><b>Action</b></TableCell>
+              <TableCell>
+                <b>Name</b>
+              </TableCell>
+              <TableCell>
+                <b>Picture</b>
+              </TableCell>
+              <TableCell>
+                <b>Stock Level</b>
+              </TableCell>
+              <TableCell>
+                <b>Description</b>
+              </TableCell>
+              <TableCell>
+                <b>Action</b>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -109,7 +133,9 @@ const InventoryTable = () => {
                 </TableCell>
                 <TableCell>
                   {equipment.description || (
-                    <i style={{ color: colors.grey[500] }}>No description available</i>
+                    <i style={{ color: colors.grey[500] }}>
+                      No description available
+                    </i>
                   )}
                 </TableCell>
                 <TableCell>

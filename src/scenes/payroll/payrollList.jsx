@@ -1,15 +1,26 @@
-import { useState } from "react";
-import { Box, useTheme, Button, Dialog, DialogContent  } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Box, useTheme, Button, Dialog, DialogContent } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined';
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import { mockDataEmployee } from "../../data/mockData";
 import Header from "../../components/Header";
 import AddPayrollForm from "../payroll/addPayrollForm";
+import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
-const PayrollList= () => {
+const PayrollList = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const { authToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
 
   const [AddEmployeeOpen, setAddEmployeeOpen] = useState(false);
   const [employees, setEmployees] = useState(mockDataEmployee);
@@ -31,8 +42,6 @@ const PayrollList= () => {
     ]);
   };
 
-
-
   const columns = [
     { field: "id", headerName: "Employee ID" },
     { field: "title", headerName: "Title", flex: 1 },
@@ -47,7 +56,7 @@ const PayrollList= () => {
           <Button
             variant="outlined"
             color="#f5f5f5"
-            startIcon={<ArchiveOutlinedIcon/>}
+            startIcon={<ArchiveOutlinedIcon />}
             onClick={() => handleArchive(params.row.id)}
           >
             Archive
@@ -97,8 +106,13 @@ const PayrollList= () => {
 
         <DataGrid checkboxSelection rows={employees} columns={columns} />
 
-        <Dialog open={AddEmployeeOpen} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogContent>
+        <Dialog
+          open={AddEmployeeOpen}
+          onClose={handleClose}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogContent>
             <AddPayrollForm
               closeModal={handleClose}
               onAddEmployee={handleAddEmployee}

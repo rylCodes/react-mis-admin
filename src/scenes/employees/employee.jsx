@@ -18,10 +18,21 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddEmployee from "./AddEmployee";
 import Header from "../../components/Header";
 import axios from "axios"; // For API requests
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
 const Employee = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const { authToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
 
   const [AddEmployeeOpen, setAddEmployeeOpen] = useState(false);
   const [EditEmployeeOpen, setEditEmployeeOpen] = useState(false);

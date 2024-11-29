@@ -1,28 +1,46 @@
-import React, { useState } from "react";
-import { TextField, Button, Box, Grid, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import {
+  TextField,
+  Button,
+  Box,
+  Grid,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for routing
+import { AuthContext } from "../../context/AuthContext";
 
 const AddPayrollForm = ({ closeModal, onAddEmployee }) => {
-  const navigate = useNavigate(); // Use the navigate hook
+  const { authToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
   const [step, setStep] = useState(1); // Track the current step (1: Basic Details, 2: Salary Details)
 
   const [employeeData, setEmployeeData] = useState({
     employeeID: "",
-    dateFrom: "",    // Date From
-    dateTo: "",      // Date To
+    dateFrom: "", // Date From
+    dateTo: "", // Date To
     presentDays: "", // Present Days
     earnings: {
       overtime: 0,
       yearlyBonus: 0,
       salesCommission: 0,
-      taripaIncentives: 0
+      taripaIncentives: 0,
     },
     deductions: {
       sss: 0,
       pagIbig: 0,
       philHealth: 0,
-      underTime: 0
-    }
+      underTime: 0,
+    },
   });
 
   const [openModal, setOpenModal] = useState(false); // State to open and close modal
@@ -31,11 +49,12 @@ const AddPayrollForm = ({ closeModal, onAddEmployee }) => {
     const { name, value } = e.target;
 
     // If the value is empty, treat it as an empty string or handle numeric fields
-    const numericValue = value === "" ? "" : !isNaN(value) ? parseFloat(value) : value;
+    const numericValue =
+      value === "" ? "" : !isNaN(value) ? parseFloat(value) : value;
 
     // Handle nested fields for earnings and deductions
     if (name in employeeData.earnings) {
-      setEmployeeData(prevData => ({
+      setEmployeeData((prevData) => ({
         ...prevData,
         earnings: {
           ...prevData.earnings,
@@ -43,7 +62,7 @@ const AddPayrollForm = ({ closeModal, onAddEmployee }) => {
         },
       }));
     } else if (name in employeeData.deductions) {
-      setEmployeeData(prevData => ({
+      setEmployeeData((prevData) => ({
         ...prevData,
         deductions: {
           ...prevData.deductions,
@@ -51,7 +70,7 @@ const AddPayrollForm = ({ closeModal, onAddEmployee }) => {
         },
       }));
     } else {
-      setEmployeeData(prevData => ({
+      setEmployeeData((prevData) => ({
         ...prevData,
         [name]: value,
       }));
@@ -76,7 +95,11 @@ const AddPayrollForm = ({ closeModal, onAddEmployee }) => {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{ display: "flex", flexDirection: "column", gap: "10px" }}
+    >
       {step === 1 && (
         <>
           <TextField
@@ -111,7 +134,12 @@ const AddPayrollForm = ({ closeModal, onAddEmployee }) => {
         <Button variant="outlined" onClick={closeModal}>
           Cancel
         </Button>
-        <Button type="submit" variant="contained" color="primary" onClick={handleNext}>
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          onClick={handleNext}
+        >
           Next
         </Button>
       </Box>
@@ -143,7 +171,9 @@ const AddPayrollForm = ({ closeModal, onAddEmployee }) => {
 
           {/* Earnings Table */}
           <Box mt={2}>
-            <Typography variant="h6" padding={2}>Earnings</Typography>
+            <Typography variant="h6" padding={2}>
+              Earnings
+            </Typography>
             <Grid container spacing={2}>
               <Grid item xs={6}>
                 <TextField
@@ -190,7 +220,9 @@ const AddPayrollForm = ({ closeModal, onAddEmployee }) => {
 
           {/* Deductions Table */}
           <Box mt={2}>
-            <Typography variant="h6" padding={2}>Deductions</Typography>
+            <Typography variant="h6" padding={2}>
+              Deductions
+            </Typography>
             <Grid container spacing={2}>
               <Grid item xs={6}>
                 <TextField

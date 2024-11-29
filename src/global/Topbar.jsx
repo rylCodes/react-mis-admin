@@ -9,11 +9,13 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { AuthContext } from "../context/AuthContext";
 
 const Topbar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
+  const { authToken, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // State for the profile menu
@@ -32,16 +34,12 @@ const Topbar = () => {
         {},
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            Authorization: `Bearer ${authToken}`,
           },
         }
       );
 
-      // Clear session-related data (if any)
-      localStorage.removeItem("access_token");
-      sessionStorage.clear();
-
-      // Redirect to the login page or home page
+      logout();
       navigate("/");
     } catch (error) {
       console.error("Logout failed", error);

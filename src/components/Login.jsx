@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   Grid,
   Paper,
@@ -15,6 +15,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { AuthContext } from "../context/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -23,7 +24,14 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const navigate = useNavigate(); // Hook for navigation
+  const { authToken, login } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (authToken) {
+      navigate("/dashboard");
+    }
+  }, [authToken, navigate]);
 
   // Handle Login
   const handleSubmit = async (e) => {
@@ -36,9 +44,9 @@ const Login = () => {
       });
 
       const { data } = response;
-      // Handle successful login, e.g., save token, redirect, etc.
+      // Handle successful login, save the token and redirect
+      login(data.meta.access_token); // Save token via context
       console.log("Login successful:", data);
-      localStorage.setItem("access_token", data.meta.access_token); // Save token for authentication
       navigate("/dashboard");
     } catch (err) {
       // Handle errors

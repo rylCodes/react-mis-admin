@@ -1,7 +1,18 @@
-import React, { useState } from "react";
-import { Box, TextField, Button, Grid, } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Box, TextField, Button, Grid } from "@mui/material";
+import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const PayrollForm = ({ closeModal, onAddEmployee }) => {
+  const { authToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
+
   const [formData, setFormData] = useState({
     id: "",
     title: "",
@@ -22,7 +33,11 @@ const PayrollForm = ({ closeModal, onAddEmployee }) => {
     if (!formData.title) formErrors.title = "Title is required";
     if (!formData.from) formErrors.from = "Start date is required";
     if (!formData.to) formErrors.to = "End date is required";
-    if (formData.from && formData.to && new Date(formData.from) > new Date(formData.to)) {
+    if (
+      formData.from &&
+      formData.to &&
+      new Date(formData.from) > new Date(formData.to)
+    ) {
       formErrors.dateRange = "Start date cannot be later than end date";
     }
     setErrors(formErrors);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, useTheme, Button, Snackbar, Alert } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
@@ -6,29 +6,50 @@ import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBacku
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import { mockDataEmployee } from "../../data/mockData";
 import Header from "../../components/Header";
+import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const EmployeeArchive = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  const { authToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
+
   const [employees, setEmployees] = useState(mockDataEmployee);
-  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
-
-
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
 
   const handleDelete = (id) => {
     // Delete customer logic
     setEmployees((prevEmployees) =>
       prevEmployees.filter((employees) => employees.id !== id)
     );
-    setSnackbar({ open: true, message: "Customer deleted successfully!", severity: "error" });
+    setSnackbar({
+      open: true,
+      message: "Customer deleted successfully!",
+      severity: "error",
+    });
   };
 
   const handleRestore = (id) => {
     // Restore customer logic
     const restoredCustomer = employees.find((employees) => employees.id === id);
     console.log("Restored customer:", restoredCustomer);
-    setSnackbar({ open: true, message: "Customer restored successfully!", severity: "success" });
+    setSnackbar({
+      open: true,
+      message: "Customer restored successfully!",
+      severity: "success",
+    });
   };
 
   const handleSnackbarClose = () => {
@@ -44,30 +65,30 @@ const EmployeeArchive = () => {
     { field: "position", headerName: "Position", flex: 1 },
     { field: "joined", headerName: "Joined", flex: 1 },
     {
-        field: "action",
-        headerName: "Action",
-        flex: 1,
-        renderCell: (params) => (
-          <Box display="flex" gap="10px" justifyContent="center">
-            <Button
-              variant="outlined"
-              color="primary"
-              startIcon={<SettingsBackupRestoreOutlinedIcon />}
-              onClick={() => handleRestore(params.row.id)}
-            >
-              Restore
-            </Button>
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<DeleteOutlineOutlinedIcon />}
-              onClick={() => handleDelete(params.row.id)}
-            >
-              Delete
-            </Button>
-          </Box>
-        ),
-      },
+      field: "action",
+      headerName: "Action",
+      flex: 1,
+      renderCell: (params) => (
+        <Box display="flex" gap="10px" justifyContent="center">
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<SettingsBackupRestoreOutlinedIcon />}
+            onClick={() => handleRestore(params.row.id)}
+          >
+            Restore
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteOutlineOutlinedIcon />}
+            onClick={() => handleDelete(params.row.id)}
+          >
+            Delete
+          </Button>
+        </Box>
+      ),
+    },
   ];
 
   return (
@@ -104,16 +125,19 @@ const EmployeeArchive = () => {
       >
         <DataGrid checkboxSelection rows={employees} columns={columns} />
         <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: "100%" }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-        
+          open={snackbar.open}
+          autoHideDuration={3000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert
+            onClose={handleSnackbarClose}
+            severity={snackbar.severity}
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Box>
     </Box>
   );

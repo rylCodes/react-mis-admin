@@ -3,12 +3,24 @@ import { Box, Typography, Button } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import { useTheme } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
 const currentUser = "Admin";
 
 const AuditTrail = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const { authToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
+
   const [auditLogs, setAuditLogs] = useState([]);
 
   const formatDate = (date) => {
@@ -54,13 +66,24 @@ const AuditTrail = () => {
         Audit Trail
       </Typography>
       <Box>
-        <Button variant="contained" color="primary" onClick={() => logAuditTrail("User logged in")}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => logAuditTrail("User logged in")}
+        >
           Log In
         </Button>
-        <Button variant="contained" color="secondary" onClick={() => logAuditTrail("User logged out")}>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => logAuditTrail("User logged out")}
+        >
           Log Out
         </Button>
-        <Button variant="contained" onClick={() => logAuditTrail("User updated profile")}>
+        <Button
+          variant="contained"
+          onClick={() => logAuditTrail("User updated profile")}
+        >
           Update Profile
         </Button>
       </Box>
@@ -71,9 +94,17 @@ const AuditTrail = () => {
           "& .MuiDataGrid-root": { border: "none" },
           "& .MuiDataGrid-cell": { borderBottom: "none" },
           "& .name-column--cell": { color: colors.greenAccent[300] },
-          "& .MuiDataGrid-columnHeaders": { backgroundColor: colors.blueAccent[700], borderBottom: "none" },
-          "& .MuiDataGrid-virtualScroller": { backgroundColor: colors.primary[400] },
-          "& .MuiDataGrid-footerContainer": { borderTop: "none", backgroundColor: colors.blueAccent[700] },
+          "& .MuiDataGrid-columnHeaders": {
+            backgroundColor: colors.blueAccent[700],
+            borderBottom: "none",
+          },
+          "& .MuiDataGrid-virtualScroller": {
+            backgroundColor: colors.primary[400],
+          },
+          "& .MuiDataGrid-footerContainer": {
+            borderTop: "none",
+            backgroundColor: colors.blueAccent[700],
+          },
         }}
       >
         <DataGrid rows={auditLogs} columns={columns} pageSize={5} />

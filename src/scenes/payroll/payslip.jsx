@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -16,13 +16,22 @@ import {
 import { tokens } from "../../theme";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { jsPDF } from "jspdf"; // Import jsPDF
+import { AuthContext } from "../../context/AuthContext";
 
 const PaySlip = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  const { authToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
+
   const [isVisible, setIsVisible] = useState(true); // State to toggle visibility
-  const navigate = useNavigate(); // React Router navigate hook
 
   const handleCancel = () => {
     setIsVisible(false); // Hide the pay slip when Cancel is clicked
@@ -157,30 +166,51 @@ const PaySlip = () => {
                       <TableCell sx={{ color: "#333", padding: "8px 16px" }}>
                         NO. OF DAYS WORKED
                       </TableCell>
-                      <TableCell align="right" sx={{ color: "#333", padding: "8px 16px" }}>
+                      <TableCell
+                        align="right"
+                        sx={{ color: "#333", padding: "8px 16px" }}
+                      >
                         6
                       </TableCell>
-                      <TableCell align="right" sx={{ color: "#333", padding: "8px 16px" }}>
+                      <TableCell
+                        align="right"
+                        sx={{ color: "#333", padding: "8px 16px" }}
+                      >
                         3,300.00
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell sx={{ color: "#333", padding: "8px 16px" }}>Overtime</TableCell>
-                      <TableCell align="right" sx={{ color: "#333", padding: "8px 16px" }}>
+                      <TableCell sx={{ color: "#333", padding: "8px 16px" }}>
+                        Overtime
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        sx={{ color: "#333", padding: "8px 16px" }}
+                      >
                         0.00
                       </TableCell>
-                      <TableCell align="right" sx={{ color: "#333", padding: "8px 16px" }}></TableCell>
+                      <TableCell
+                        align="right"
+                        sx={{ color: "#333", padding: "8px 16px" }}
+                      ></TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell colSpan={2} align="right">
                         <Typography
                           fontWeight="bold"
-                          sx={{ color: "#f5f5f5", padding: "8px 16px", backgroundColor: "#333" }}
+                          sx={{
+                            color: "#f5f5f5",
+                            padding: "8px 16px",
+                            backgroundColor: "#333",
+                          }}
                         >
                           Total
                         </Typography>
                       </TableCell>
-                      <TableCell align="right" sx={{ color: "#333", padding: "8px 16px" }}>
+                      <TableCell
+                        align="right"
+                        sx={{ color: "#333", padding: "8px 16px" }}
+                      >
                         3,300.00
                       </TableCell>
                     </TableRow>
@@ -191,7 +221,11 @@ const PaySlip = () => {
                         <TableCell sx={{ color: "#333", padding: "8px 16px" }}>
                           {deduction.label}
                         </TableCell>
-                        <TableCell colSpan={2} align="right" sx={{ color: "#333", padding: "8px 16px" }}>
+                        <TableCell
+                          colSpan={2}
+                          align="right"
+                          sx={{ color: "#333", padding: "8px 16px" }}
+                        >
                           {deduction.amount}
                         </TableCell>
                       </TableRow>
@@ -207,7 +241,10 @@ const PaySlip = () => {
                           Total Deductions
                         </Typography>
                       </TableCell>
-                      <TableCell align="right" sx={{ color: "#333", padding: "8px 16px" }}>
+                      <TableCell
+                        align="right"
+                        sx={{ color: "#333", padding: "8px 16px" }}
+                      >
                         -682.44
                       </TableCell>
                     </TableRow>
@@ -216,7 +253,11 @@ const PaySlip = () => {
               </TableContainer>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom sx={{ color: "#333", padding: "8px 16px" }}>
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{ color: "#333", padding: "8px 16px" }}
+              >
                 Breakdowns
               </Typography>
               <Box sx={{ color: "#333", padding: "8px 16px" }}>
@@ -231,7 +272,11 @@ const PaySlip = () => {
         </Box>
         <Divider />
         {/* Footer */}
-        <Box p={4} textAlign="center" sx={{ color: "#333", paddingTop: "20px", marginTop: "15px" }}>
+        <Box
+          p={4}
+          textAlign="center"
+          sx={{ color: "#333", paddingTop: "20px", marginTop: "15px" }}
+        >
           <Typography variant="h5" fontWeight="bold">
             NET PAY.....P 2,617.56
           </Typography>
@@ -240,10 +285,20 @@ const PaySlip = () => {
 
       {/* Buttons moved outside the main Box */}
       <Box p={4} textAlign="center" sx={{ marginTop: "20px" }}>
-        <Button variant="contained" color="primary" sx={{ mr: 2 }} onClick={handlePrint}>
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ mr: 2 }}
+          onClick={handlePrint}
+        >
           Print
         </Button>
-        <Button variant="contained" color="secondary" sx={{ mr: 2 }} onClick={handleSave}>
+        <Button
+          variant="contained"
+          color="secondary"
+          sx={{ mr: 2 }}
+          onClick={handleSave}
+        >
           Save
         </Button>
         <Button variant="outlined" color="error" onClick={handleCancel}>

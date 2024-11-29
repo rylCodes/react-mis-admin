@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Grid,
   Paper,
@@ -7,28 +7,38 @@ import {
   Button,
   MenuItem,
   Snackbar,
-} from '@material-ui/core';
+} from "@material-ui/core";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
-import { Box, useTheme} from "@mui/material";
-
+import { Box, useTheme } from "@mui/material";
+import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const BackupAndRestore = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  const [days, setDays] = useState(''); // Days between reminders
-  const [backupFrom, setBackupFrom] = useState(''); // Backup source folder
-  const [backupTo, setBackupTo] = useState(''); // Backup destination folder
-  const [restoreFrom, setRestoreFrom] = useState(''); // Restore source folder
-  const [restoreTo, setRestoreTo] = useState(''); // Restore destination folder
-  const [restoreImagesTo, setRestoreImagesTo] = useState(''); // Restore images folder
-  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const { authToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
+
+  const [days, setDays] = useState(""); // Days between reminders
+  const [backupFrom, setBackupFrom] = useState(""); // Backup source folder
+  const [backupTo, setBackupTo] = useState(""); // Backup destination folder
+  const [restoreFrom, setRestoreFrom] = useState(""); // Restore source folder
+  const [restoreTo, setRestoreTo] = useState(""); // Restore destination folder
+  const [restoreImagesTo, setRestoreImagesTo] = useState(""); // Restore images folder
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const handleBrowse = (setter) => {
     // Placeholder for folder selection logic
-    const folderPath = window.prompt('Enter folder path:');
+    const folderPath = window.prompt("Enter folder path:");
     if (folderPath) {
       setter(folderPath);
       showSnackbar(`Folder selected: ${folderPath}`);
@@ -46,7 +56,7 @@ const BackupAndRestore = () => {
 
   const handleBackup = () => {
     if (!backupFrom || !backupTo) {
-      showSnackbar('Backup paths cannot be empty!');
+      showSnackbar("Backup paths cannot be empty!");
       return;
     }
     showSnackbar(`Backup initiated from: ${backupFrom} to: ${backupTo}`);
@@ -54,7 +64,7 @@ const BackupAndRestore = () => {
 
   const handleRestore = () => {
     if (!restoreFrom || !restoreTo || !restoreImagesTo) {
-      showSnackbar('Restore paths cannot be empty!');
+      showSnackbar("Restore paths cannot be empty!");
       return;
     }
     showSnackbar(
@@ -63,19 +73,21 @@ const BackupAndRestore = () => {
   };
 
   const handleSaveDefaults = () => {
-    showSnackbar('Default paths saved!');
+    showSnackbar("Default paths saved!");
   };
 
-  const paperStyle = { padding: 20, margin: '20px auto', maxWidth: 1300,  
-    backgroundColor: colors.primary[400]
+  const paperStyle = {
+    padding: 20,
+    margin: "20px auto",
+    maxWidth: 1300,
+    backgroundColor: colors.primary[400],
   };
 
   return (
     <Box m="20px">
-    <Header title="Backup and Restore" subtitle="" />
-    
-      <Paper elevation={3} style={paperStyle }  >
-       
+      <Header title="Backup and Restore" subtitle="" />
+
+      <Paper elevation={3} style={paperStyle}>
         {/* Data Backup Section */}
         <Typography variant="h6" gutterBottom>
           Data Backup
@@ -140,18 +152,14 @@ const BackupAndRestore = () => {
           </Grid>
 
           <Grid item xs={12}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleBackup}
-            >
+            <Button variant="contained" color="primary" onClick={handleBackup}>
               Backup
             </Button>
           </Grid>
         </Grid>
 
         {/* Data Restore Section */}
-        <Typography variant="h6" gutterBottom style={{ marginTop: '20px' }}>
+        <Typography variant="h6" gutterBottom style={{ marginTop: "20px" }}>
           Data Restore
         </Typography>
         <Grid container spacing={2}>
@@ -230,7 +238,7 @@ const BackupAndRestore = () => {
         </Grid>
 
         {/* Save Defaults */}
-        <Grid container spacing={2} style={{ marginTop: '20px' }}>
+        <Grid container spacing={2} style={{ marginTop: "20px" }}>
           <Grid item xs={12}>
             <Button
               variant="contained"

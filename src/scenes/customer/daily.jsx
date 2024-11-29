@@ -1,12 +1,14 @@
-import { useState } from "react";
-import { Button, Box,  useTheme } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Button, Box, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import { mockDataDaily } from "../../data/mockData";
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined';
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 
 import Header from "../../components/Header";
+import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Daily = () => {
   const theme = useTheme();
@@ -14,13 +16,18 @@ const Daily = () => {
 
   const [daily, setDaily] = useState(mockDataDaily);
 
+  const { authToken } = useContext(AuthContext);
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
 
   const handleupdate = (id) => {
     // Delete employee logic
-    setDaily((prevtDaily) =>
-      prevtDaily.filter((daily) => daily.id !== id)
-    );
+    setDaily((prevtDaily) => prevtDaily.filter((daily) => daily.id !== id));
   };
 
   const handleEdit = (id) => {
@@ -28,7 +35,6 @@ const Daily = () => {
     console.log("Edit employee with ID:", id);
     // You can open a modal with pre-filled employee data for editing
   };
-
 
   const columns = [
     { field: "id", headerName: "ID" },
@@ -51,8 +57,7 @@ const Daily = () => {
           <Button
             variant="outlined"
             color="primary"
-            
-            startIcon={<ArchiveOutlinedIcon/> }
+            startIcon={<ArchiveOutlinedIcon />}
             onClick={() => handleEdit(params.row.id)}
           >
             Archive
@@ -60,10 +65,10 @@ const Daily = () => {
           <Button
             variant="outlined"
             color="error"
-            startIcon={< EditOutlinedIcon  />}
+            startIcon={<EditOutlinedIcon />}
             onClick={() => handleupdate(params.row.id)}
           >
-           Update
+            Update
           </Button>
         </Box>
       ),
@@ -102,9 +107,7 @@ const Daily = () => {
           },
         }}
       >
-         
         <DataGrid checkboxSelection rows={daily} columns={columns} />
-        
       </Box>
     </Box>
   );

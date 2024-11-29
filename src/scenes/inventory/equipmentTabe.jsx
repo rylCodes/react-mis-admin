@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Table,
@@ -13,7 +13,8 @@ import {
 } from "@mui/material";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
-
+import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const initialEquipmentData = [
   {
@@ -43,26 +44,46 @@ const EquipmentTable = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  const { authToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
+
   const [equipmentData] = useState(initialEquipmentData);
 
   const handleEdit = (id) => {
     alert(`Editing equipment with ID: ${id}`);
   };
 
-  
-
   return (
     <Box sx={{ padding: 3 }}>
       <Header title="Equipment" subtitle="Manage Discounts and Packages" />
-      <TableContainer component={Paper} sx={{ backgroundColor: colors.primary[400] }}>
+      <TableContainer
+        component={Paper}
+        sx={{ backgroundColor: colors.primary[400] }}
+      >
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell><b>Name</b></TableCell>
-              <TableCell><b>Picture</b></TableCell>
-              <TableCell><b>Stock Level</b></TableCell>
-              <TableCell><b>Description</b></TableCell>
-              <TableCell><b>Action</b></TableCell>
+              <TableCell>
+                <b>Name</b>
+              </TableCell>
+              <TableCell>
+                <b>Picture</b>
+              </TableCell>
+              <TableCell>
+                <b>Stock Level</b>
+              </TableCell>
+              <TableCell>
+                <b>Description</b>
+              </TableCell>
+              <TableCell>
+                <b>Action</b>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -73,7 +94,11 @@ const EquipmentTable = () => {
                   <img
                     src={equipment.picture}
                     alt={equipment.name}
-                    style={{ width: "100px", height: "auto", borderRadius: "5px" }}
+                    style={{
+                      width: "100px",
+                      height: "auto",
+                      borderRadius: "5px",
+                    }}
                   />
                 </TableCell>
                 <TableCell>{equipment.stockLevel}</TableCell>
@@ -87,7 +112,6 @@ const EquipmentTable = () => {
                   >
                     Edit
                   </Button>
-                 
                 </TableCell>
               </TableRow>
             ))}

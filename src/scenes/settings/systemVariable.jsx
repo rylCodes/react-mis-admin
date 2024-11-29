@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -10,10 +10,12 @@ import {
 } from "@mui/material";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
+import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const sections = [
-    { id: "edit", label: "Edit Logo" },
-    { id: "edit-1", label: "Edit Information" },
+  { id: "edit", label: "Edit Logo" },
+  { id: "edit-1", label: "Edit Information" },
 
   { id: "edit-discount", label: "Edit Discount" },
   { id: "edit-package-1", label: "GYM PER SESSION" },
@@ -27,17 +29,23 @@ const sections = [
   { id: "edit-package-8", label: "TAEKWANDO" },
   { id: "edit-package-9", label: "MUAY THAI" },
   { id: "edit-package-10", label: "BOXING   " },
-
-
-
 ];
 
 const SystemVariable = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  const { authToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
+
   const [selectedSection, setSelectedSection] = useState("edit-discount");
-  const [ setImage] = useState(null);
+  const [setImage] = useState(null);
   const [description, setDescription] = useState(
     "STUDENT PROMO IS BACK.\nPresent your ID or any proof that you are a student / or graduating student/s for this school year 2023-2024.\nPROMO RUNS UNTIL July 4, 2024."
   );
@@ -62,7 +70,10 @@ const SystemVariable = () => {
 
   return (
     <Box sx={{ padding: 3 }}>
-      <Header title="System Variable" subtitle="Manage Discounts and Packages" />
+      <Header
+        title="System Variable"
+        subtitle="Manage Discounts and Packages"
+      />
 
       {/* Section Selection Buttons */}
       <Box sx={{ marginBottom: 3 }}>
@@ -85,12 +96,20 @@ const SystemVariable = () => {
       </Box>
 
       {/* Dynamic Section Editor */}
-      <Paper elevation={3} sx={{ padding: 3, backgroundColor: colors.primary[400] }}>
+      <Paper
+        elevation={3}
+        sx={{ padding: 3, backgroundColor: colors.primary[400] }}
+      >
         <Typography variant="h6" gutterBottom>
           {sections.find((section) => section.id === selectedSection)?.label}
         </Typography>
 
-        <Grid container spacing={2} alignItems="center" sx={{ marginBottom: 3 }}>
+        <Grid
+          container
+          spacing={2}
+          alignItems="center"
+          sx={{ marginBottom: 3 }}
+        >
           <Grid item xs={12} md={6}>
             <Typography variant="body2">
               Please upload an image (in .jpg, .png only)

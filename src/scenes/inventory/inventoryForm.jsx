@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   TextField,
@@ -7,16 +7,25 @@ import {
   Grid,
   Tabs,
   Tab,
-  useTheme
+  useTheme,
 } from "@mui/material";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
-
-
+import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const InventoryForm = () => {
-    const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+
+  const { authToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
 
   const [tabValue, setTabValue] = useState(0);
   const [formData, setFormData] = useState({
@@ -56,95 +65,101 @@ const InventoryForm = () => {
 
   return (
     <>
-    <Header title="Inventory Form" subtitle="" />
-    <Box p={2} sx={{backgroundColor: colors.primary[400]}}>
-      <Typography variant="h5" mb={2}>
-        Item Details
-      </Typography>
-      <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
-        <Tab label="Item" />
-        <Tab label="Upload Image" />
-      </Tabs>
+      <Header title="Inventory Form" subtitle="" />
+      <Box p={2} sx={{ backgroundColor: colors.primary[400] }}>
+        <Typography variant="h5" mb={2}>
+          Item Details
+        </Typography>
+        <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
+          <Tab label="Item" />
+          <Tab label="Upload Image" />
+        </Tabs>
 
-      {tabValue === 0 && (
-        <Box>
-          <Grid container spacing={2} mb={2}>
-            <Grid item xs={6}>
-              <TextField
-                label="Item Number"
-                name="itemNumber"
-                value={formData.itemNumber}
-                onChange={handleInputChange}
-                fullWidth
-              />
+        {tabValue === 0 && (
+          <Box>
+            <Grid container spacing={2} mb={2}>
+              <Grid item xs={6}>
+                <TextField
+                  label="Item Number"
+                  name="itemNumber"
+                  value={formData.itemNumber}
+                  onChange={handleInputChange}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Product ID"
+                  name="productId"
+                  value={formData.productId}
+                  onChange={handleInputChange}
+                  fullWidth
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={6}>
-              <TextField
-                label="Product ID"
-                name="productId"
-                value={formData.productId}
-                onChange={handleInputChange}
-                fullWidth
-              />
+            <TextField
+              label="Item Name"
+              name="itemName"
+              value={formData.itemName}
+              onChange={handleInputChange}
+              fullWidth
+              mb={2}
+            />
+            <TextField
+              label="Description"
+              multiline
+              rows={4}
+              fullWidth
+              mb={2}
+            />
+            <Grid container spacing={2} mb={2}>
+              <Grid item xs={6}>
+                <TextField
+                  label="Quantity"
+                  name="quantity"
+                  value={formData.quantity}
+                  onChange={handleInputChange}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Unit Price"
+                  name="unitPrice"
+                  value={formData.unitPrice}
+                  onChange={handleInputChange}
+                  fullWidth
+                />
+              </Grid>
             </Grid>
-          </Grid>
-          <TextField
-            label="Item Name"
-            name="itemName"
-            value={formData.itemName}
-            onChange={handleInputChange}
-            fullWidth
-            mb={2}
-          />
-          <TextField
-            label="Description"
-            multiline
-            rows={4}
-            fullWidth
-            mb={2}
-          />
-          <Grid container spacing={2} mb={2}>
-            <Grid item xs={6}>
-              <TextField
-                label="Quantity"
-                name="quantity"
-                value={formData.quantity}
-                onChange={handleInputChange}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                label="Unit Price"
-                name="unitPrice"
-                value={formData.unitPrice}
-                onChange={handleInputChange}
-                fullWidth
-              />
-            </Grid>
-          </Grid>
-          <Box mt={2}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSubmit}
-              sx={{ mr: 2 }}
-            >
-              Update
-            </Button>
-            <Button variant="outlined" color="secondary" onClick={handleClear}>
-              Clear
-            </Button>
+            <Box mt={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSubmit}
+                sx={{ mr: 2 }}
+              >
+                Update
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={handleClear}
+              >
+                Clear
+              </Button>
+            </Box>
           </Box>
-        </Box>
-      )}
+        )}
 
-      {tabValue === 1 && (
-        <Box>
-          <Typography variant="body1">Upload image feature coming soon...</Typography>
-        </Box>
-      )}
-    </Box>
+        {tabValue === 1 && (
+          <Box>
+            <Typography variant="body1">
+              Upload image feature coming soon...
+            </Typography>
+          </Box>
+        )}
+      </Box>
     </>
   );
 };

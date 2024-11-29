@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   TextField,
@@ -17,11 +17,19 @@ import { useNavigate } from "react-router-dom"; // Import for navigation
 import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
+import { AuthContext } from "../../context/AuthContext";
 
 const SalaryInclusionForm = ({ employeeID, dateFrom, dateTo }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const navigate = useNavigate(); // Hook for navigation
+  const { authToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
 
   const [presentDays, setPresentDays] = useState("");
   const [earnings, setEarnings] = useState([
@@ -32,16 +40,21 @@ const SalaryInclusionForm = ({ employeeID, dateFrom, dateTo }) => {
   ]);
   const [deductions, setDeductions] = useState([
     { name: "SSS", amount: 163.13 },
-    { name: "Pag-IBIG", amount: 71.50 },
+    { name: "Pag-IBIG", amount: 71.5 },
     { name: "PhilHealth", amount: 25 },
     { name: "UnderTime", amount: 354 },
-
   ]);
   const [netSalary, setNetSalary] = useState(0);
 
   // Calculate total earnings and total deductions
-  const totalEarnings = earnings.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-  const totalDeductions = deductions.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+  const totalEarnings = earnings.reduce(
+    (sum, item) => sum + (parseFloat(item.amount) || 0),
+    0
+  );
+  const totalDeductions = deductions.reduce(
+    (sum, item) => sum + (parseFloat(item.amount) || 0),
+    0
+  );
 
   const calculateNetSalary = () => {
     setNetSalary(totalEarnings - totalDeductions);
@@ -125,7 +138,8 @@ const SalaryInclusionForm = ({ employeeID, dateFrom, dateTo }) => {
                           value={earning.amount}
                           onChange={(e) => {
                             const newEarnings = [...earnings];
-                            newEarnings[index].amount = parseFloat(e.target.value) || 0;
+                            newEarnings[index].amount =
+                              parseFloat(e.target.value) || 0;
                             setEarnings(newEarnings);
                           }}
                           fullWidth
@@ -171,7 +185,8 @@ const SalaryInclusionForm = ({ employeeID, dateFrom, dateTo }) => {
                           value={deduction.amount}
                           onChange={(e) => {
                             const newDeductions = [...deductions];
-                            newDeductions[index].amount = parseFloat(e.target.value) || 0;
+                            newDeductions[index].amount =
+                              parseFloat(e.target.value) || 0;
                             setDeductions(newDeductions);
                           }}
                           fullWidth
@@ -189,10 +204,18 @@ const SalaryInclusionForm = ({ employeeID, dateFrom, dateTo }) => {
         </Grid>
 
         <Box sx={{ marginTop: 2, textAlign: "right" }}>
-          <Button variant="contained" onClick={calculateNetSalary} sx={{ marginRight: 2 }}>
+          <Button
+            variant="contained"
+            onClick={calculateNetSalary}
+            sx={{ marginRight: 2 }}
+          >
             Calculate Net Salary
           </Button>
-          <Button variant="contained" color="secondary" onClick={saveAndGoToPayslip}>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={saveAndGoToPayslip}
+          >
             Save and Go to Payslip
           </Button>
         </Box>
