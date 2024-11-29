@@ -71,7 +71,12 @@ const CustomerList = () => {
       // Archive by updating `is_active` to false
       const response = await axios.post(
         "http://localhost:8000/api/admin/show-client",
-        { id }
+        { id },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
       );
       if (response.status === 200) {
         setCustomer((prevCustomer) => prevCustomer.filter((c) => c.id !== id));
@@ -88,7 +93,12 @@ const CustomerList = () => {
   const fetchClients = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/admin/show-client"
+        "http://localhost:8000/api/admin/show-client",
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
       );
       console.log(response.data.data);
       if (response.status === 200) {
@@ -128,6 +138,11 @@ const CustomerList = () => {
           address: selectedCustomer.address,
           gender: selectedCustomer.sex,
           contact_no: selectedCustomer.contact,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
         }
       );
       if (response.status === 200) {

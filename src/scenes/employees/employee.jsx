@@ -45,7 +45,12 @@ const Employee = () => {
   const fetchEmployees = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/admin/show-staff"
+        "http://localhost:8000/api/admin/show-staff",
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
       );
       const formattedData = response.data.data.map((staff) => ({
         id: staff.id,
@@ -65,7 +70,12 @@ const Employee = () => {
   const fetchPositions = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/admin/show-position"
+        "http://localhost:8000/api/admin/show-position",
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
       );
       setPositions(response.data.data);
     } catch (error) {
@@ -139,6 +149,11 @@ const Employee = () => {
           address: selectedEmployee.address,
           gender: selectedEmployee.gender,
           contact_no: selectedEmployee.phone,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
         }
       );
       setEmployees((prevEmployees) =>

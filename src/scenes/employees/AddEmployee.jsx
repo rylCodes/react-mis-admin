@@ -9,8 +9,11 @@ import {
   FormControl,
 } from "@mui/material";
 import axios from "axios";
+import { AuthContext } from "../../context/AuthContext";
 
 const AddEmployee = ({ closeModal, onAddEmployee, loading, positions }) => {
+  const { authToken } = useContext(AuthContext);
+
   const [employeeData, setEmployeeData] = useState({
     firstname: "",
     lastname: "",
@@ -35,7 +38,12 @@ const AddEmployee = ({ closeModal, onAddEmployee, loading, positions }) => {
     try {
       const response = await axios.post(
         "http://localhost:8000/api/admin/store-staff",
-        employeeData
+        employeeData,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
       );
 
       if (response.status === 201) {

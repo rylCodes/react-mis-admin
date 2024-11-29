@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   TextField,
   Button,
@@ -9,8 +9,11 @@ import {
   FormControl,
 } from "@mui/material";
 import axios from "axios";
+import { AuthContext } from "../../context/AuthContext";
 
 const AddCustomer = ({ closeModal, onAddCustomer }) => {
+  const { authToken } = useContext(AuthContext);
+
   const [clientData, setClientData] = useState({
     firstname: "",
     lastname: "",
@@ -35,7 +38,12 @@ const AddCustomer = ({ closeModal, onAddCustomer }) => {
     try {
       const response = await axios.post(
         "http://localhost:8000/api/admin/store-client",
-        clientData
+        clientData,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
       );
       onAddCustomer(response.data.data); // Update parent state if needed
       closeModal();
