@@ -10,6 +10,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Modal,
+  Typography,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
@@ -49,6 +51,12 @@ const Employee = () => {
   const [isFetching, setIsFetching] = useState(false);
   const [employees, setEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+  const [attendanceModalOpen, setAttendanceModalOpen] = useState(false);
+  const [attendanceData, setAttendanceData] = useState({
+    attendance: "present",
+    date: new Date().toISOString().split("T")[0], // Default to today
+  });
 
   const [positions, setPositions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -199,6 +207,48 @@ const Employee = () => {
     }
   };
 
+  const handleAttendanceOpen = (employee) => {
+    setSelectedEmployee(employee);
+    setAttendanceModalOpen(true);
+  };
+
+  const handleAttendanceClose = () => {
+    setAttendanceModalOpen(false);
+    setSelectedEmployee(null);
+  };
+
+  const handleAttendanceChange = (event) => {
+    const { name, value } = event.target;
+    setAttendanceData({
+      ...attendanceData,
+      [name]: value,
+    });
+  };
+
+  const handleAttendanceSubmit = async () => {
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/api/admin/store-attendance/${selectedEmployee.id}`,
+        {
+          staff_id: selectedEmployee.id,
+          date: attendanceData.date,
+          attendance: attendanceData.attendance,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      console.log("Attendance recorded successfully:", response.data);
+      handleAttendanceClose();
+      alert("Attendance recorded successfully");
+    } catch (error) {
+      console.error("Error recording attendance:", error);
+      alert("Failed to record attendance");
+    }
+  };
+
   const columns = [
     { field: "id", headerName: "ID" },
     { field: "name", headerName: "Name", flex: 1 },
@@ -216,11 +266,10 @@ const Employee = () => {
         <Box display="flex" gap="9px" justifyContent="center">
           <Button
             variant="outlined"
-            color="inherit"
-            startIcon={<ArchiveOutlinedIcon />}
-            onClick={() => handleArchive(params.row.id)}
+            color="info"
+            onClick={() => handleAttendanceOpen(params.row)}
           >
-            Archive
+            Attendance
           </Button>
           <Button
             variant="outlined"
@@ -229,6 +278,14 @@ const Employee = () => {
             onClick={() => handleEditOpen(params.row)}
           >
             Update
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<ArchiveOutlinedIcon />}
+            onClick={() => handleArchive(params.row.id)}
+          >
+            Archive
           </Button>
         </Box>
       ),
@@ -412,6 +469,72 @@ const Employee = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        <Modal
+          open={attendanceModalOpen}
+          onClose={handleAttendanceClose}
+          aria-labelledby="attendance-modal-title"
+          aria-describedby="attendance-modal-description"
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 400,
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            <Typography id="attendance-modal-title" variant="h6" component="h2">
+              Mark Attendance
+            </Typography>
+            <Box component="form" sx={{ mt: 2 }}>
+              <FormControl fullWidth required sx={{ mb: 2 }}>
+                <InputLabel>Attendance</InputLabel>
+                <Select
+                  label="Attendance"
+                  name="attendance"
+                  value={attendanceData.attendance}
+                  onChange={handleAttendanceChange}
+                >
+                  <MenuItem value="present">Present</MenuItem>
+                  <MenuItem value="absent">Absent</MenuItem>
+                  <MenuItem value="halfday">Halfday</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                label="Date"
+                name="date"
+                type="date"
+                value={attendanceData.date}
+                onChange={handleAttendanceChange}
+                fullWidth
+                required
+                sx={{ mb: 2 }}
+              />
+              <Box mt={2}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleAttendanceSubmit}
+                  sx={{ mr: 2 }}
+                >
+                  Submit
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={handleAttendanceClose}
+                >
+                  Cancel
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+        </Modal>
       </Box>
     </Box>
   );
