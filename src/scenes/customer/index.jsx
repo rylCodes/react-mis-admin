@@ -221,7 +221,7 @@ const CustomerList = () => {
         <Box display="flex" gap="9px" justifyContent="center">
           <Button
             variant="outlined"
-            color="primary"
+            color="inherit"
             startIcon={<ArchiveOutlinedIcon />}
             onClick={() => handleArchive(params.row.id)}
           >
@@ -229,7 +229,7 @@ const CustomerList = () => {
           </Button>
           <Button
             variant="outlined"
-            color="error"
+            color="success"
             startIcon={<EditOutlinedIcon />}
             onClick={() => handleUpdateOpen(params.row)}
           >

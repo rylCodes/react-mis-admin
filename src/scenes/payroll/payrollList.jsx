@@ -55,7 +55,7 @@ const PayrollList = () => {
         <Box display="flex" gap="9px" justifyContent="center">
           <Button
             variant="outlined"
-            color="#f5f5f5"
+            color="inherit"
             startIcon={<ArchiveOutlinedIcon />}
             onClick={() => handleArchive(params.row.id)}
           >

@@ -216,7 +216,7 @@ const Employee = () => {
         <Box display="flex" gap="9px" justifyContent="center">
           <Button
             variant="outlined"
-            color="primary"
+            color="inherit"
             startIcon={<ArchiveOutlinedIcon />}
             onClick={() => handleArchive(params.row.id)}
           >
@@ -224,11 +224,11 @@ const Employee = () => {
           </Button>
           <Button
             variant="outlined"
-            color="secondary"
+            color="success"
             startIcon={<EditOutlinedIcon />}
             onClick={() => handleEditOpen(params.row)}
           >
-            Edit
+            Update
           </Button>
         </Box>
       ),

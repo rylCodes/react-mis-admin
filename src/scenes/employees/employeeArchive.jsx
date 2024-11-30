@@ -72,7 +72,7 @@ const EmployeeArchive = () => {
         <Box display="flex" gap="10px" justifyContent="center">
           <Button
             variant="outlined"
-            color="primary"
+            color="success"
             startIcon={<SettingsBackupRestoreOutlinedIcon />}
             onClick={() => handleRestore(params.row.id)}
           >

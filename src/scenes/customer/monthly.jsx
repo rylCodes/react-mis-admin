@@ -58,7 +58,7 @@ const Monthly = () => {
         <Box display="flex" gap="15px" justifyContent="center">
           <Button
             variant="outlined"
-            color="primary"
+            color="inherit"
             startIcon={<ArchiveOutlinedIcon />}
             onClick={() => handleEdit(params.row.id)}
           >
@@ -66,7 +66,7 @@ const Monthly = () => {
           </Button>
           <Button
             variant="outlined"
-            color="error"
+            color="success"
             startIcon={<EditOutlinedIcon />}
             onClick={() => handleupdate(params.row.id)}
           >

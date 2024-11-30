@@ -101,7 +101,13 @@ const InventoryForm = () => {
         <Typography variant="h5" mb={2}>
           Item Details
         </Typography>
-        <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
+        <Tabs
+          indicatorColor="secondary"
+          textColor="inherit"
+          value={tabValue}
+          onChange={handleTabChange}
+          sx={{ mb: 2 }}
+        >
           <Tab label="Item" />
           <Tab label="Upload Image" />
         </Tabs>
