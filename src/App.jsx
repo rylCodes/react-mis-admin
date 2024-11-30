@@ -38,6 +38,8 @@ import AddPayrollForm from "./scenes/payroll/addPayrollForm.jsx";
 import PaymentForm from "./components/paymentForm.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { AlertProvider } from "./context/AlertContext.jsx";
+import Positions from "./scenes/employees/EmployeePosition.jsx";
+import EmployeePosition from "./scenes/employees/EmployeePosition.jsx";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -106,10 +108,8 @@ function ContentLayout({ isSidebar, setIsSidebar }) {
           <Route path="/payroll-list" element={<PayrollList />} />
           <Route path="/payroll-form" element={<PayrollForm />} />
           <Route path="/addpayroll-form" element={<AddPayrollForm />} />
-          <Route
-            path="/salary-inclusionform"
-            element={<SalaryInclusionForm />}
-          />
+          <Route path="/employee-position" element={<EmployeePosition />} />
+          <Route path="/employeearchive" element={<EmployeeArchive />} />
           <Route path="/payslip" element={<Payslip />} />
           <Route path="/audittrail" element={<AuditTrail />} />
           <Route path="/accountsettings" element={<AccountSettings />} />

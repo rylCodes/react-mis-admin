@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { Menu, MenuItem, ProSidebarProvider } from "react-pro-sidebar";
-import { Box,  Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { tokens } from "../theme";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
-import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 
-
-
-const Item = ({  title, to, icon, selected, setSelected  }) => {
+const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   return (
@@ -26,8 +24,6 @@ const Item = ({  title, to, icon, selected, setSelected  }) => {
       <Typography>{title}</Typography>
       <Link to={to} />
     </MenuItem>
-
-
   );
 };
 
@@ -37,7 +33,6 @@ const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
 
-
   const [showCustomerOptions, setShowCustomerOptions] = useState(false);
   const toggleCustomerOptions = () => {
     setShowCustomerOptions((prev) => !prev); // Toggle sub-menu visibility
@@ -46,7 +41,7 @@ const Sidebar = () => {
   const toggleEmployeeOptions = () => {
     setShowEmployeeOptions((prev) => !prev); // Toggle sub-menu visibility
   };
-  
+
   const [showInventoryOptions, setShowInventoryOptions] = useState(false);
   const toggleInventoryOptions = () => {
     setShowInventoryOptions((prev) => !prev); // Toggle sub-menu visibility
@@ -55,7 +50,6 @@ const Sidebar = () => {
   const [showSettingsOptions, setShowSettingsOptions] = useState(false);
   const toggleSettingsOptions = () => {
     setShowSettingsOptions((prev) => !prev); // Toggle sub-menu visibility
-
   };
   const [showArchiveOptions, setShowArchiveOptions] = useState(false);
   const toggleArchiveOptions = () => {
@@ -64,36 +58,33 @@ const Sidebar = () => {
 
   const navigate = useNavigate();
 
-  
   const handleSelect = (title, path) => {
     setSelected(title);
     navigate(path);
   };
 
-
   return (
     <Box
-    sx={{
-      "& .pro-sidebar-inner": {
-        background: `${colors.primary[300]} !important`,
-      },
-      "& .pro-icon-wrapper": {
-        backgroundColor: "transparent !important",
-      },
-      "& .pro-inner-item": {
-        padding: "5px 35px 5px 20px !important",
-      },
-      "& .pro-inner-item:hover": {
-        color: "#868dfb !important",
-      },
-      "& .pro-menu-item.active": {
-        color: "#6870fa !important",
-      },
-    }}
-
+      sx={{
+        "& .pro-sidebar-inner": {
+          background: `${colors.primary[300]} !important`,
+        },
+        "& .pro-icon-wrapper": {
+          backgroundColor: "transparent !important",
+        },
+        "& .pro-inner-item": {
+          padding: "5px 35px 5px 20px !important",
+        },
+        "& .pro-inner-item:hover": {
+          color: "#868dfb !important",
+        },
+        "& .pro-menu-item.active": {
+          color: "#6870fa !important",
+        },
+      }}
     >
       <ProSidebarProvider collapsed={isCollapsed}>
-      <Menu iconShape="square">
+        <Menu iconShape="square">
           {/* LOGO AND MENU ICON */}
           <MenuItem
             onClick={() => setIsCollapsed(!isCollapsed)}
@@ -113,25 +104,21 @@ const Sidebar = () => {
                 <Typography variant="h2" color={colors.grey[100]}>
                   Adminis
                 </Typography>
-                
               </Box>
             )}
           </MenuItem>
 
-
-
           {!isCollapsed && (
             <Box mb="25px">
-              <Box 
-              display="flex" 
-              justifyContent="center" 
-              alignItems="center" 
-              padding={"30px"} marginRight={"10px"}>
-              </Box>
-             
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                padding={"30px"}
+                marginRight={"10px"}
+              ></Box>
             </Box>
           )}
-
 
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
@@ -139,192 +126,211 @@ const Sidebar = () => {
               to="/dashboard"
               icon={<HomeOutlinedIcon />}
               selected={selected}
-              setSelected={() => handleSelect('Dashboard', '/dashboard')}
+              setSelected={() => handleSelect("Dashboard", "/dashboard")}
             />
 
-            
-
-  {/*Customer */}
+            {/*Customer */}
             <Item
               title="Customer"
               to="/"
               icon={<PeopleAltOutlinedIcon />}
-              selected={selected === '/'}
+              selected={selected === "/"}
               setSelected={() => {
-                handleSelect('/');
+                handleSelect("/");
                 toggleCustomerOptions();
-            }}
+              }}
             />
 
-              {showCustomerOptions && (
-                <div style={{ paddingLeft: '20px' }}>
+            {showCustomerOptions && (
+              <div style={{ paddingLeft: "20px" }}>
                 <Item
                   title="Customer List"
                   to="/customer"
-                  selected={selected === '/customer'}
-                  setSelected={() => handleSelect('Customer List', '/customer')}
+                  selected={selected === "/customer"}
+                  setSelected={() => handleSelect("Customer List", "/customer")}
                 />
                 <Item
                   title="Daily"
                   to="/daily"
-                  selected={selected === '/daily'}
-                  setSelected={() => handleSelect('Daily','/daily')}
+                  selected={selected === "/daily"}
+                  setSelected={() => handleSelect("Daily", "/daily")}
                 />
-                  <Item
+                <Item
                   title="Monthly"
                   to="/monthlye"
-                  selected={selected === '/monthly'}
-                  setSelected={() => handleSelect('Monthly','/monthly')}
+                  selected={selected === "/monthly"}
+                  setSelected={() => handleSelect("Monthly", "/monthly")}
                 />
               </div>
-            )}  
+            )}
 
-{/*Employee */}
+            {/*Employee */}
             <Item
               title="Employees"
               to="/"
               icon={<BadgeOutlinedIcon />}
-              selected={selected === '/'}
+              selected={selected === "/"}
               setSelected={() => {
-                handleSelect('/');
+                handleSelect("/");
                 toggleEmployeeOptions();
-             }}
+              }}
             />
-             {showEmployeeOptions && (
-                <div style={{ paddingLeft: '20px' }}>
+            {showEmployeeOptions && (
+              <div style={{ paddingLeft: "20px" }}>
                 <Item
                   title="Employee Attendance"
                   to="/employeeAttendance"
-                  selected={selected === '/'}
-                  setSelected={() => handleSelect('Employee Attendance', '/employeeAttendance')}
+                  selected={selected === "/"}
+                  setSelected={() =>
+                    handleSelect("Employee Attendance", "/employeeAttendance")
+                  }
                 />
                 <Item
                   title="Employee List"
                   to="/employee"
-                  selected={selected === '/employee'}
-                  setSelected={() => handleSelect('Employee ', '/employee')}
+                  selected={selected === "/employee"}
+                  setSelected={() => handleSelect("Employee ", "/employee")}
+                />
+                <Item
+                  title="Employee Position"
+                  to="/employee-position"
+                  selected={selected === "/employee-position"}
+                  setSelected={() =>
+                    handleSelect("Employee ", "/employee-position")
+                  }
                 />
               </div>
-            )}  
+            )}
             <Item
               title="Payroll"
               to="/payroll-list"
               icon={<HomeOutlinedIcon />}
               selected={selected}
-              setSelected={() => handleSelect('Payroll List', '/payroll-list')}
+              setSelected={() => handleSelect("Payroll List", "/payroll-list")}
             />
 
-{/*Inventory */}
-              <Item
-                title="Inventory"
-                to="/"
-                icon={<BadgeOutlinedIcon />}
-                selected={selected === '/'}
-                setSelected={() => {
-                  handleSelect('/');
-                  toggleInventoryOptions();
+            {/*Inventory */}
+            <Item
+              title="Inventory"
+              to="/"
+              icon={<BadgeOutlinedIcon />}
+              selected={selected === "/"}
+              setSelected={() => {
+                handleSelect("/");
+                toggleInventoryOptions();
               }}
-              />
-              {showInventoryOptions && (
-                  <div style={{ paddingLeft: '20px' }}>
-                  <Item
-                    title="Inventory Form"
-                    to="/inventoryform"
-                    selected={selected === '/inventoryform'}
-                    setSelected={() => handleSelect('Inventory Form', '/inventoryform')}
-                  />
-                  <Item
-                    title="Equipment Table"
-                    to="/equipmenttable"
-                    selected={selected === '/equipmenttable'}
-                    setSelected={() => handleSelect('Equipment Table','/equipmenttable')}
-                    />
-                     <Item
-                    title="Inventory Table"
-                    to="/inventory-table"
-                    selected={selected === '/inventory-table'}
-                    setSelected={() => handleSelect('Inventory Table','/inventory-table')}
-                    />
-                    
-                    <Item
-                    title="Report"
-                    to="/report"
-                    selected={selected === '/report'}
-                    setSelected={() => handleSelect('Report','/report')}
-                  />
-                </div>
-              )}  
-{/*Settings */}
-              <Item
+            />
+            {showInventoryOptions && (
+              <div style={{ paddingLeft: "20px" }}>
+                <Item
+                  title="Inventory Form"
+                  to="/inventoryform"
+                  selected={selected === "/inventoryform"}
+                  setSelected={() =>
+                    handleSelect("Inventory Form", "/inventoryform")
+                  }
+                />
+                <Item
+                  title="Equipment Table"
+                  to="/equipmenttable"
+                  selected={selected === "/equipmenttable"}
+                  setSelected={() =>
+                    handleSelect("Equipment Table", "/equipmenttable")
+                  }
+                />
+                <Item
+                  title="Inventory Table"
+                  to="/inventory-table"
+                  selected={selected === "/inventory-table"}
+                  setSelected={() =>
+                    handleSelect("Inventory Table", "/inventory-table")
+                  }
+                />
+
+                <Item
+                  title="Report"
+                  to="/report"
+                  selected={selected === "/report"}
+                  setSelected={() => handleSelect("Report", "/report")}
+                />
+              </div>
+            )}
+            {/*Settings */}
+            <Item
               title="Settings"
               to="/settings"
               icon={<SettingsOutlinedIcon />}
-              selected={selected === '/settings'}
+              selected={selected === "/settings"}
               setSelected={() => {
-                handleSelect('/settings');
+                handleSelect("/settings");
                 toggleSettingsOptions();
-            }}
+              }}
             />
             {showSettingsOptions && (
-                <div style={{ paddingLeft: '20px' }}>
-
-
-              <Item
-              title="Archive"
-              to="/"
-              selected={selected === '/'}
-              setSelected={() => {
-                handleSelect('/settings');
-                toggleArchiveOptions();
-            }}
-            />
-            {showArchiveOptions && (
-                <div style={{ paddingLeft: '20px' }}>
-
-                  
+              <div style={{ paddingLeft: "20px" }}>
                 <Item
-                  title="Customer"
-                  to="/customerarchive"
-                  selected={selected === '/customerarchive'}
-                  setSelected={() => handleSelect('Customer', '/customerarchive')}                
+                  title="Archive"
+                  to="/"
+                  selected={selected === "/"}
+                  setSelected={() => {
+                    handleSelect("/settings");
+                    toggleArchiveOptions();
+                  }}
                 />
-              
-                <Item
-                  title="Employee"
-                  to="/employeearchive"
-                  selected={selected === '/employeearchive'}
-                  setSelected={() => handleSelect('Employee','/employeearchive')}
-                />
-              </div>
-            )}              
-              
+                {showArchiveOptions && (
+                  <div style={{ paddingLeft: "20px" }}>
+                    <Item
+                      title="Customer"
+                      to="/customerarchive"
+                      selected={selected === "/customerarchive"}
+                      setSelected={() =>
+                        handleSelect("Customer", "/customerarchive")
+                      }
+                    />
+
+                    <Item
+                      title="Employee"
+                      to="/employeearchive"
+                      selected={selected === "/employeearchive"}
+                      setSelected={() =>
+                        handleSelect("Employee", "/employeearchive")
+                      }
+                    />
+                  </div>
+                )}
+
                 <Item
                   title="Account Settings"
                   to="/accountsettings"
-                  selected={selected === '/accountsettings'}
-                  setSelected={() => handleSelect('Account Settings','/accountsettings')}
+                  selected={selected === "/accountsettings"}
+                  setSelected={() =>
+                    handleSelect("Account Settings", "/accountsettings")
+                  }
                 />
-                  <Item
+                <Item
                   title="Audit Trial "
                   to="/audittrail"
-                  selected={selected === '/audittrail'}
-                  setSelected={() => handleSelect('Audit Trail','/audittrail')}
+                  selected={selected === "/audittrail"}
+                  setSelected={() => handleSelect("Audit Trail", "/audittrail")}
                 />
                 <Item
                   title="Back up and Restore "
                   to="/backandrestore"
-                  selected={selected === '/backandrestore'}
-                  setSelected={() => handleSelect('Back up and Restore','/backandrestore')}
+                  selected={selected === "/backandrestore"}
+                  setSelected={() =>
+                    handleSelect("Back up and Restore", "/backandrestore")
+                  }
                 />
-                 <Item
+                <Item
                   title="System Vaviable "
                   to="/systemvariable"
-                  selected={selected === '/systemvariable'}
-                  setSelected={() => handleSelect('System Varibale','/systemvariable')}
+                  selected={selected === "/systemvariable"}
+                  setSelected={() =>
+                    handleSelect("System Varibale", "/systemvariable")
+                  }
                 />
               </div>
-            )}                        
-                    
+            )}
           </Box>
         </Menu>
       </ProSidebarProvider>
