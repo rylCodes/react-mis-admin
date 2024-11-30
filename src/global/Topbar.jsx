@@ -10,13 +10,23 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+import { useAlert } from "../context/AlertContext";
 
 const Topbar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
   const { authToken, logout } = useContext(AuthContext);
+  const showAlert = useAlert();
   const navigate = useNavigate();
+
+  const handleSuccess = () => {
+    showAlert(`You successfully logged out.`, "success");
+  };
+
+  const handleError = () => {
+    showAlert("An error occurred while logging out!", "error");
+  };
 
   // State for the profile menu
   const [anchorEl, setAnchorEl] = useState(null);
@@ -41,9 +51,10 @@ const Topbar = () => {
 
       logout();
       navigate("/");
+      handleSuccess();
     } catch (error) {
       console.error("Logout failed", error);
-      alert("Error logging out. Please try again.");
+      handleError();
     }
   };
 
