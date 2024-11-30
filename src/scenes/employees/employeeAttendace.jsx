@@ -2,11 +2,10 @@ import { useContext, useEffect, useState } from "react";
 import { Box, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-
-import { mockDataEmployeeAttendance } from "../../data/mockData";
 import Header from "../../components/Header";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const EmployeeAttendance = () => {
   const theme = useTheme();
@@ -15,22 +14,44 @@ const EmployeeAttendance = () => {
   const { authToken } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const [employeesAttendance, setEmployeesAttendance] = useState([]);
+
   useEffect(() => {
     if (!authToken) {
       navigate("/");
+    } else {
+      fetchAttendanceData();
     }
   }, [authToken, navigate]);
 
-  const [employeesAttendance] = useState(mockDataEmployeeAttendance);
+  const fetchAttendanceData = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/admin/show-attendance-list",
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      const formattedData = response.data.data.map((attendance) => ({
+        id: attendance.id,
+        name: attendance.name,
+        date: attendance.date,
+        attendance: attendance.status,
+      }));
+      setEmployeesAttendance(formattedData);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Failed to fetch attendance data:", error);
+    }
+  };
 
   const columns = [
     { field: "id", headerName: "ID" },
     { field: "name", headerName: "Name", flex: 1 },
-    { field: "timein", headerName: "Time In", flex: 1 },
-    { field: "timeout", headerName: "Time Out", flex: 1 },
-    { field: "sex", headerName: "Sex", headerAlign: "left", align: "left" },
-    { field: "phone", headerName: "Phone Number", flex: 1 },
-    { field: "email", headerName: "Email", flex: 1 },
+    { field: "date", headerName: "Date", flex: 1 },
+    { field: "attendance", headerName: "Attendance", flex: 1 },
   ];
 
   return (
