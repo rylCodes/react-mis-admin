@@ -1,11 +1,27 @@
-import { useContext, useEffect, useState } from "react";
-import { Box, useTheme } from "@mui/material";
+import React, { useState, useContext, useEffect } from "react";
+import {
+  Box,
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  useTheme,
+  MenuItem,
+  Typography,
+  FormControl,
+  InputLabel,
+  Select,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
 const EmployeeAttendance = () => {
   const theme = useTheme();
@@ -15,6 +31,9 @@ const EmployeeAttendance = () => {
   const navigate = useNavigate();
 
   const [employeesAttendance, setEmployeesAttendance] = useState([]);
+  const [selectedAttendance, setSelectedAttendance] = useState(null);
+  const [newAttendanceStatus, setNewAttendanceStatus] = useState("");
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!authToken) {
@@ -47,11 +66,62 @@ const EmployeeAttendance = () => {
     }
   };
 
+  const handleUpdateAttendance = async () => {
+    if (!selectedAttendance || !newAttendanceStatus) return;
+
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/api/admin/update-attendance/${selectedAttendance.id}`,
+        { attendance: newAttendanceStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      console.log(response.data);
+      fetchAttendanceData(); // Refresh the data
+      setSelectedAttendance(null);
+      setNewAttendanceStatus("");
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to update attendance:", error);
+    }
+  };
+
+  const handleClickOpen = (row) => {
+    setSelectedAttendance(row);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedAttendance(null);
+    setNewAttendanceStatus("");
+  };
+
   const columns = [
     { field: "id", headerName: "ID" },
     { field: "name", headerName: "Name", flex: 1 },
     { field: "date", headerName: "Date", flex: 1 },
     { field: "attendance", headerName: "Attendance", flex: 1 },
+    {
+      field: "action",
+      headerName: "Action",
+      flex: 1,
+      renderCell: (params) => (
+        <Box display="flex" gap="9px" justifyContent="center">
+          <Button
+            variant="outlined"
+            color="success"
+            startIcon={<EditOutlinedIcon />}
+            onClick={() => handleClickOpen(params.row)}
+          >
+            Update
+          </Button>
+        </Box>
+      ),
+    },
   ];
 
   return (
@@ -95,6 +165,35 @@ const EmployeeAttendance = () => {
           columns={columns}
         />
       </Box>
+
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Update Attendance</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Update the attendance status for {selectedAttendance?.name}.
+          </DialogContentText>
+          <FormControl fullWidth required sx={{ mb: 2 }}>
+            <InputLabel>Attendance</InputLabel>
+            <Select
+              label="Attendance"
+              value={newAttendanceStatus}
+              onChange={(e) => setNewAttendanceStatus(e.target.value)}
+            >
+              <MenuItem value="present">Present</MenuItem>
+              <MenuItem value="absent">Absent</MenuItem>
+              <MenuItem value="halfday">Halfday</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="error">
+            Cancel
+          </Button>
+          <Button onClick={handleUpdateAttendance} color="secondary">
+            Update
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
