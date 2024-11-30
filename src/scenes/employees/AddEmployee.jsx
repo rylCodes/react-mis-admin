@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   TextField,
   Button,
@@ -10,9 +10,19 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
+import { useAlert } from "../../context/AlertContext";
 
 const AddEmployee = ({ closeModal, onAddEmployee, loading, positions }) => {
   const { authToken } = useContext(AuthContext);
+  const showAlert = useAlert();
+
+  const handleSuccess = () => {
+    showAlert(`Employee successfully added.`, "success");
+  };
+
+  const handleError = () => {
+    showAlert("An error occurred while adding the employee!", "error");
+  };
 
   const [employeeData, setEmployeeData] = useState({
     firstname: "",
@@ -48,12 +58,12 @@ const AddEmployee = ({ closeModal, onAddEmployee, loading, positions }) => {
 
       if (response.status === 201) {
         onAddEmployee(response.data.data); // Pass the new staff to the parent component
-        alert(response.data.message || "Employee added successfully!");
         closeModal(); // Close the modal
+        handleSuccess();
       }
     } catch (error) {
       console.error(error);
-      alert("An error occurred while adding the employee. Please try again.");
+      handleError();
     }
   };
 

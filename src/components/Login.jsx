@@ -16,6 +16,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+import { useAlert } from "../context/AlertContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -25,7 +26,16 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
 
   const { authToken, login } = useContext(AuthContext);
+  const showAlert = useAlert();
   const navigate = useNavigate();
+
+  const handleSuccess = (user) => {
+    showAlert(`Welcome back, ${user || "Admin"}!`, "success");
+  };
+
+  const handleError = () => {
+    showAlert("Something went wrong!", "error");
+  };
 
   useEffect(() => {
     if (authToken) {
@@ -48,6 +58,7 @@ const Login = () => {
       login(data.meta.access_token); // Save token via context
       console.log("Login successful:", data);
       navigate("/dashboard");
+      handleSuccess(data.data.name);
     } catch (err) {
       // Handle errors
       if (err.response && err.response.data && err.response.data.error) {
@@ -56,6 +67,7 @@ const Login = () => {
         setError("An error occurred. Please try again.");
       }
       console.error("Login failed:", err);
+      handleError();
     }
   };
 

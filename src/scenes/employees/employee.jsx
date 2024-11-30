@@ -20,13 +20,23 @@ import Header from "../../components/Header";
 import axios from "axios"; // For API requests
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
+import { useAlert } from "../../context/AlertContext";
 
 const Employee = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const { authToken } = useContext(AuthContext);
+  const showAlert = useAlert();
   const navigate = useNavigate();
+
+  const handleUpdateSuccess = () => {
+    showAlert(`Employee successfully updated.`, "success");
+  };
+
+  const handleError = () => {
+    showAlert("An error occurred while updating the employee!", "error");
+  };
 
   useEffect(() => {
     if (!authToken) {
@@ -36,6 +46,7 @@ const Employee = () => {
 
   const [AddEmployeeOpen, setAddEmployeeOpen] = useState(false);
   const [EditEmployeeOpen, setEditEmployeeOpen] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
   const [employees, setEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
@@ -118,11 +129,7 @@ const Employee = () => {
   const handleEditClose = () => setEditEmployeeOpen(false);
 
   const handleAddEmployee = (newEmployee) => {
-    // Add new employee to the state (consider adding an API call here)
-    setEmployees((prevEmployees) => [
-      ...prevEmployees,
-      { id: prevEmployees.length + 1, ...newEmployee },
-    ]);
+    fetchEmployees();
   };
 
   const handleArchive = (id) => {
@@ -162,6 +169,7 @@ const Employee = () => {
         )
       );
       handleEditClose();
+      console.log(response.status);
 
       if (response.status === 200) {
         // Update local state after successful API update
@@ -178,15 +186,16 @@ const Employee = () => {
           )
         );
 
-        alert("Employee updated successfully");
         handleEditClose();
         setIsFetching(false);
+        handleUpdateSuccess();
       } else {
-        alert("Failed to update the customer");
         setIsFetching(false);
+        handleError();
       }
     } catch (error) {
       console.error("Failed to update employee:", error);
+      handleError();
     }
   };
 

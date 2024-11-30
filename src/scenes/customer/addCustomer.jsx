@@ -10,9 +10,19 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
+import { useAlert } from "../../context/AlertContext";
 
 const AddCustomer = ({ closeModal, onAddCustomer }) => {
   const { authToken } = useContext(AuthContext);
+  const showAlert = useAlert();
+
+  const handleSuccess = () => {
+    showAlert(`Customer successfully added.`, "success");
+  };
+
+  const handleError = () => {
+    showAlert("An error occurred while adding the customer!", "error");
+  };
 
   const [clientData, setClientData] = useState({
     firstname: "",
@@ -47,11 +57,11 @@ const AddCustomer = ({ closeModal, onAddCustomer }) => {
       );
       onAddCustomer(response.data.data); // Update parent state if needed
       closeModal();
+      handleSuccess();
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "An error occurred while adding the client."
-      );
+      console.log(err);
+      setError("An error occurred while adding the client.");
+      handleError();
     }
   };
 

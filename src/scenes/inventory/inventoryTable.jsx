@@ -25,13 +25,23 @@ import Header from "../../components/Header";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useAlert } from "../../context/AlertContext";
 
 const InventoryTable = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const { authToken } = useContext(AuthContext);
+  const showAlert = useAlert();
   const navigate = useNavigate();
+
+  const handleUpdateSuccess = () => {
+    showAlert(`Inventory successfully updated.`, "success");
+  };
+
+  const handleError = () => {
+    showAlert("An error occurred while updating the inventory!", "error");
+  };
 
   const [inventoryData, setInventoryData] = useState([]);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -93,9 +103,10 @@ const InventoryTable = () => {
         item.id === currentItem.id ? response.data.data : item
       );
       setInventoryData(updatedInventoryData);
-      alert("Inventory updated successfully");
+      handleUpdateSuccess();
     } catch (error) {
       console.error("Error updating inventory:", error);
+      handleError();
     }
   };
 

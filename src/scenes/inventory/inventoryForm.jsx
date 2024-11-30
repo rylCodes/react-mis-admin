@@ -18,13 +18,23 @@ import Header from "../../components/Header";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useAlert } from "../../context/AlertContext";
 
 const InventoryForm = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const { authToken } = useContext(AuthContext);
+  const showAlert = useAlert();
   const navigate = useNavigate();
+
+  const handleSuccess = () => {
+    showAlert(`Inventory successfully created.`, "success");
+  };
+
+  const handleError = () => {
+    showAlert("An error occurred while creating the inventory!", "error");
+  };
 
   useEffect(() => {
     if (!authToken) {
@@ -67,9 +77,10 @@ const InventoryForm = () => {
       );
       console.log("Inventory created successfully:", response.data);
       handleClear();
-      alert("Inventory created successfully");
+      handleSuccess();
     } catch (error) {
       console.error("Error creating inventory:", error);
+      handleError();
     }
   };
 

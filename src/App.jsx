@@ -37,6 +37,7 @@ import PayrollForm from "./scenes/payroll/payrollForm.jsx";
 import AddPayrollForm from "./scenes/payroll/addPayrollForm.jsx";
 import PaymentForm from "./components/paymentForm.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { AlertProvider } from "./context/AlertContext.jsx";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -47,19 +48,21 @@ function App() {
   }, []);
   return (
     <AuthProvider>
-      <Router>
-        <ColorModeContext.Provider value={colorMode}>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <div className="app">
-              <ContentLayout
-                isSidebar={isSidebar}
-                setIsSidebar={setIsSidebar}
-              />
-            </div>
-          </ThemeProvider>
-        </ColorModeContext.Provider>
-      </Router>
+      <AlertProvider>
+        <Router>
+          <ColorModeContext.Provider value={colorMode}>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <div className="app">
+                <ContentLayout
+                  isSidebar={isSidebar}
+                  setIsSidebar={setIsSidebar}
+                />
+              </div>
+            </ThemeProvider>
+          </ColorModeContext.Provider>
+        </Router>
+      </AlertProvider>
     </AuthProvider>
   );
 }

@@ -22,12 +22,22 @@ import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import AddCustomer from "./addCustomer";
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
+import { useAlert } from "../../context/AlertContext";
 
 const CustomerList = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const { authToken } = useContext(AuthContext);
+  const showAlert = useAlert();
   const navigate = useNavigate();
+
+  const handleUpdateSuccess = () => {
+    showAlert(`Customer successfully updated.`, "success");
+  };
+
+  const handleError = () => {
+    showAlert("An error occurred while updating the customer!", "error");
+  };
 
   useEffect(() => {
     if (!authToken) {
@@ -45,10 +55,7 @@ const CustomerList = () => {
   const handleClose = () => setAddCustomerOpen(false);
 
   const handleAddCustomer = (newcustomer) => {
-    setCustomer((prevCustomer) => [
-      ...prevCustomer,
-      { id: prevCustomer.length + 1, ...newcustomer },
-    ]);
+    fetchClients();
   };
 
   const handleUpdateOpen = (customer) => {
@@ -159,18 +166,17 @@ const CustomerList = () => {
             c.id === selectedCustomer.id ? updatedCustomer : c
           )
         );
-
-        alert("Customer updated successfully");
         handleUpdateClose();
         setIsFetching(false);
+        handleUpdateSuccess();
       } else {
-        alert("Failed to update the customer");
         setIsFetching(false);
+        handleError();
       }
     } catch (error) {
       console.error("Error updating customer:", error);
       setIsFetching(false);
-      alert("An error occurred while updating the customer");
+      handleError();
     }
   };
 
