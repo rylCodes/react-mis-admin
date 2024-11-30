@@ -22,13 +22,23 @@ import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import { useAlert } from "../../context/AlertContext";
 
 const EmployeeAttendance = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const { authToken } = useContext(AuthContext);
+  const showAlert = useAlert();
   const navigate = useNavigate();
+
+  const handleUpdateSuccess = () => {
+    showAlert(`Attendance successfully updated.`, "success");
+  };
+
+  const handleError = () => {
+    showAlert("An error occurred while updating the attendance!", "error");
+  };
 
   const [employeesAttendance, setEmployeesAttendance] = useState([]);
   const [selectedAttendance, setSelectedAttendance] = useState(null);
@@ -79,13 +89,14 @@ const EmployeeAttendance = () => {
           },
         }
       );
-      console.log(response.data);
-      fetchAttendanceData(); // Refresh the data
+      fetchAttendanceData();
       setSelectedAttendance(null);
       setNewAttendanceStatus("");
       setOpen(false);
+      handleUpdateSuccess();
     } catch (error) {
       console.error("Failed to update attendance:", error);
+      handleError();
     }
   };
 

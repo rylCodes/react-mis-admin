@@ -36,8 +36,12 @@ const Employee = () => {
     showAlert(`Employee successfully updated.`, "success");
   };
 
+  const handleAttendanceSuccess = () => {
+    showAlert(`Attendance successfully recorded.`, "success");
+  };
+
   const handleError = () => {
-    showAlert("An error occurred while updating the employee!", "error");
+    showAlert("An error occurred!", "error");
   };
 
   useEffect(() => {
@@ -240,12 +244,11 @@ const Employee = () => {
           },
         }
       );
-      console.log("Attendance recorded successfully:", response.data);
       handleAttendanceClose();
-      alert("Attendance recorded successfully");
+      handleAttendanceSuccess();
     } catch (error) {
       console.error("Error recording attendance:", error);
-      alert("Failed to record attendance");
+      handleError();
     }
   };
 

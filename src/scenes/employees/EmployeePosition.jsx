@@ -18,13 +18,27 @@ import axios from "axios";
 import Header from "../../components/Header";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
+import { useAlert } from "../../context/AlertContext";
 
 const EmployeePosition = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const { authToken } = useContext(AuthContext);
+  const showAlert = useAlert();
   const navigate = useNavigate();
+
+  const handleCreateSuccess = () => {
+    showAlert(`Position successfully created.`, "success");
+  };
+
+  const handleUpdateSuccess = () => {
+    showAlert(`Position successfully updated.`, "success");
+  };
+
+  const handleError = () => {
+    showAlert("An error occurred!", "error");
+  };
 
   const [positions, setPositions] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -88,6 +102,7 @@ const EmployeePosition = () => {
             },
           }
         );
+        handleUpdateSuccess();
       } else {
         await axios.post(
           "http://localhost:8000/api/admin/store-position",
@@ -98,6 +113,7 @@ const EmployeePosition = () => {
             },
           }
         );
+        handleCreateSuccess();
       }
       fetchPositions();
       handleCloseModal();
@@ -112,6 +128,7 @@ const EmployeePosition = () => {
       } else {
         setError("An unexpected error occurred. Please try again.");
       }
+      handleError();
     }
   };
 
