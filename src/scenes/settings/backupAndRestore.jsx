@@ -1,49 +1,44 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
-  Grid,
+  Box,
   Paper,
   Typography,
-  TextField,
   Button,
-  MenuItem,
   Snackbar,
-} from "@material-ui/core";
+  useTheme,
+} from "@mui/material";
+import axios from "axios";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
-import { Box, useTheme } from "@mui/material";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useAlert } from "../../context/AlertContext";
 
 const BackupAndRestore = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const { authToken } = useContext(AuthContext);
+  const showAlert = useAlert();
   const navigate = useNavigate();
+
+  const handleSuccess = () => {
+    showAlert(`Backup file successfully downloaded.`, "success");
+  };
+
+  const handleError = () => {
+    showAlert("An error occurred while downloading the backup!", "error");
+  };
+
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [isLoading, setIsloading] = useState(false);
 
   useEffect(() => {
     if (!authToken) {
       navigate("/");
     }
   }, [authToken, navigate]);
-
-  const [days, setDays] = useState(""); // Days between reminders
-  const [backupFrom, setBackupFrom] = useState(""); // Backup source folder
-  const [backupTo, setBackupTo] = useState(""); // Backup destination folder
-  const [restoreFrom, setRestoreFrom] = useState(""); // Restore source folder
-  const [restoreTo, setRestoreTo] = useState(""); // Restore destination folder
-  const [restoreImagesTo, setRestoreImagesTo] = useState(""); // Restore images folder
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-
-  const handleBrowse = (setter) => {
-    // Placeholder for folder selection logic
-    const folderPath = window.prompt("Enter folder path:");
-    if (folderPath) {
-      setter(folderPath);
-      showSnackbar(`Folder selected: ${folderPath}`);
-    }
-  };
 
   const showSnackbar = (message) => {
     setSnackbarMessage(message);
@@ -54,201 +49,59 @@ const BackupAndRestore = () => {
     setSnackbarOpen(false);
   };
 
-  const handleBackup = () => {
-    if (!backupFrom || !backupTo) {
-      showSnackbar("Backup paths cannot be empty!");
-      return;
+  const handleBackup = async () => {
+    setIsloading(true);
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/admin/database/backup",
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200 && response.data.file) {
+        const link = document.createElement("a");
+        link.href = `http://localhost:8000/storage/${response.data.file}`;
+        link.download = response.data.file;
+        // link.click();
+        handleSuccess();
+        setIsloading(false);
+      } else {
+        handleError();
+        setIsloading(false);
+      }
+    } catch (error) {
+      console.error("Error creating backup file:", error);
+      handleError();
+      setIsloading(false);
     }
-    showSnackbar(`Backup initiated from: ${backupFrom} to: ${backupTo}`);
-  };
-
-  const handleRestore = () => {
-    if (!restoreFrom || !restoreTo || !restoreImagesTo) {
-      showSnackbar("Restore paths cannot be empty!");
-      return;
-    }
-    showSnackbar(
-      `Restore initiated from: ${restoreFrom} to: ${restoreTo} (Images to: ${restoreImagesTo})`
-    );
-  };
-
-  const handleSaveDefaults = () => {
-    showSnackbar("Default paths saved!");
-  };
-
-  const paperStyle = {
-    padding: 20,
-    margin: "20px auto",
-    maxWidth: 1300,
-    backgroundColor: colors.primary[400],
   };
 
   return (
     <Box m="20px">
-      <Header title="Backup and Restore" subtitle="" />
+      <Header
+        title="Backup and Restore"
+        subtitle="Create a backup of your database"
+      />
 
-      <Paper elevation={3} style={paperStyle}>
-        {/* Data Backup Section */}
+      <Paper
+        elevation={3}
+        sx={{ padding: 3, backgroundColor: colors.primary[400] }}
+      >
         <Typography variant="h6" gutterBottom>
           Data Backup
         </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <TextField
-              select
-              label="Days between backup reminders"
-              value={days}
-              onChange={(e) => setDays(e.target.value)}
-              fullWidth
-            >
-              {[1, 7, 14, 30].map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option} day(s)
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Typography>Backup Database From this folder:</Typography>
-            <TextField
-              value={backupFrom}
-              placeholder="C:\\Gym Assistant\\Backup"
-              fullWidth
-              InputProps={{
-                readOnly: true,
-              }}
-            />
-          </Grid>
-          <Grid item xs={2}>
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => handleBrowse(setBackupFrom)}
-            >
-              Browse
-            </Button>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Typography>Backup To this folder:</Typography>
-            <TextField
-              value={backupTo}
-              placeholder="F:\\"
-              fullWidth
-              InputProps={{
-                readOnly: true,
-              }}
-            />
-          </Grid>
-          <Grid item xs={2}>
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => handleBrowse(setBackupTo)}
-            >
-              Browse
-            </Button>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Button variant="contained" color="primary" onClick={handleBackup}>
-              Backup
-            </Button>
-          </Grid>
-        </Grid>
-
-        {/* Data Restore Section */}
-        <Typography variant="h6" gutterBottom style={{ marginTop: "20px" }}>
-          Data Restore
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <Typography>Restore From this folder:</Typography>
-            <TextField
-              value={restoreFrom}
-              placeholder="F:\\"
-              fullWidth
-              InputProps={{
-                readOnly: true,
-              }}
-            />
-          </Grid>
-          <Grid item xs={2}>
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => handleBrowse(setRestoreFrom)}
-            >
-              Browse
-            </Button>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Typography>Restore Database To this folder:</Typography>
-            <TextField
-              value={restoreTo}
-              placeholder="D:\\"
-              fullWidth
-              InputProps={{
-                readOnly: true,
-              }}
-            />
-          </Grid>
-          <Grid item xs={2}>
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => handleBrowse(setRestoreTo)}
-            >
-              Browse
-            </Button>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Typography>Restore A-Z Images to this folder:</Typography>
-            <TextField
-              value={restoreImagesTo}
-              placeholder="C:\\Freeimages\\"
-              fullWidth
-              InputProps={{
-                readOnly: true,
-              }}
-            />
-          </Grid>
-          <Grid item xs={2}>
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => handleBrowse(setRestoreImagesTo)}
-            >
-              Browse
-            </Button>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={handleRestore}
-            >
-              Restore
-            </Button>
-          </Grid>
-        </Grid>
-
-        {/* Save Defaults */}
-        <Grid container spacing={2} style={{ marginTop: "20px" }}>
-          <Grid item xs={12}>
-            <Button
-              variant="contained"
-              color="default"
-              onClick={handleSaveDefaults}
-            >
-              Save Defaults
-            </Button>
-          </Grid>
-        </Grid>
+        <Button
+          style={{ minWidth: "10rem" }}
+          variant="contained"
+          color="primary"
+          onClick={handleBackup}
+          disabled={isLoading}
+        >
+          {isLoading ? "....." : "Download Backup"}
+        </Button>
       </Paper>
 
       {/* Snackbar for Notifications */}
