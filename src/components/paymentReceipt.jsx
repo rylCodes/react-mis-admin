@@ -13,7 +13,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { tokens } from "../theme";
-import { useNavigate } from "react-router-dom"; // For navigation
+import { useLocation, useNavigate } from "react-router-dom"; // For navigation
 import { AuthContext } from "../context/AuthContext";
 
 const PaymentReceipt = () => {
@@ -21,6 +21,9 @@ const PaymentReceipt = () => {
   const colors = tokens(theme.palette.mode);
   const { authToken } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { state } = location;
+  const customer = state?.customer;
 
   useEffect(() => {
     if (!authToken) {
@@ -28,11 +31,23 @@ const PaymentReceipt = () => {
     }
   }, [authToken, navigate]);
 
-  const memberName = "Stacey Sevilleigia";
-  const paidDate = "September 9, 2024 - 5:55 PM";
-  const lastPayment = "2023-06-12";
-  const address = `5570 Paterno Street, cor. Gajigas St., P. Burgos Ave.
-(Behind Seven Eleven), Cavite City`;
+  // Helper function to format the current date and time
+  const formatDate = (date) => {
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    };
+    return date.toLocaleDateString("en-US", options);
+  };
+
+  const memberName = customer?.fullname || "N/A";
+  const paidDate = formatDate(new Date());
+  // const lastPayment = customer?.lastPaymentDate || "N/A";
+  const address = customer?.address || "N/A";
 
   const services = [
     { name: "Monthly with Instructor", price: "PHP 1,500" },

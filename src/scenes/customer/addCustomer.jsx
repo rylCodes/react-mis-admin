@@ -11,10 +11,12 @@ import {
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
 import { useAlert } from "../../context/AlertContext";
+import { useNavigate } from "react-router-dom";
 
 const AddCustomer = ({ closeModal, onAddCustomer }) => {
   const { authToken } = useContext(AuthContext);
   const showAlert = useAlert();
+  const navigate = useNavigate();
 
   const handleSuccess = () => {
     showAlert(`Customer successfully added.`, "success");
@@ -58,6 +60,7 @@ const AddCustomer = ({ closeModal, onAddCustomer }) => {
       onAddCustomer(response.data.data); // Update parent state if needed
       closeModal();
       handleSuccess();
+      navigate("/payment-form", { state: { customer: response.data.data } });
     } catch (err) {
       console.log(err);
       setError("An error occurred while adding the client.");

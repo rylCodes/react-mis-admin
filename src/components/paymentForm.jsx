@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import { Box, Typography, Grid, Button, Paper, useTheme } from "@mui/material";
 import { tokens } from "../theme";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 const PaymentForm = () => {
@@ -9,6 +9,9 @@ const PaymentForm = () => {
   const colors = tokens(theme.palette.mode);
   const { authToken } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { state } = location;
+  const customer = state?.customer;
 
   useEffect(() => {
     if (!authToken) {
@@ -17,18 +20,18 @@ const PaymentForm = () => {
   }, [authToken, navigate]);
 
   const handlePayment = () => {
-    const paymentDetails = {
-      fullName: "Stacey Sevillegia",
-      address: "Bagong Pook San Antonio, Cavite City",
-      contactNumber: "09654782546",
-      email: "staceysevillegia@gmail.com",
-      instructor: "Carlo Diaz",
-      service: "Monthly with Instructor",
-      totalAmount: "PHP 1,500.00",
-    };
+    // const paymentDetails = {
+    //   fullName: customer?.fullName || "",
+    //   address: customer?.address ||"",
+    //   contactNumber: customer?.contact_no ||"",
+    //   email: customer?.email ||"",
+    //   instructor: customer?.instructor || "",
+    //   service: customer?.service || "",
+    //   totalAmount: customer?.amount || "",
+    // };
 
     // Navigate to the Payment Receipt page with payment details
-    navigate("/payment-receipt", { state: { paymentDetails } });
+    navigate("/payment-receipt", { state: { customer: customer } });
   };
 
   return (
@@ -75,7 +78,9 @@ const PaymentForm = () => {
                 </Typography>
               </Grid>
               <Grid item xs={8}>
-                <Typography variant="body1">Stacey Sevillegia</Typography>
+                <Typography variant="body1">
+                  {customer?.fullname || ""}
+                </Typography>
               </Grid>
 
               <Grid item xs={4}>
@@ -85,7 +90,7 @@ const PaymentForm = () => {
               </Grid>
               <Grid item xs={8}>
                 <Typography variant="body1">
-                  Bagong Pook San Antonio, Cavite City
+                  {customer?.address || ""}
                 </Typography>
               </Grid>
 
@@ -95,7 +100,9 @@ const PaymentForm = () => {
                 </Typography>
               </Grid>
               <Grid item xs={8}>
-                <Typography variant="body1">09654782546</Typography>
+                <Typography variant="body1">
+                  {customer?.contact_no || ""}
+                </Typography>
               </Grid>
 
               <Grid item xs={4}>
@@ -104,9 +111,7 @@ const PaymentForm = () => {
                 </Typography>
               </Grid>
               <Grid item xs={8}>
-                <Typography variant="body1">
-                  staceysevillegia@gmail.com
-                </Typography>
+                <Typography variant="body1">{customer?.email || ""}</Typography>
               </Grid>
 
               <Grid item xs={4}>
@@ -115,7 +120,9 @@ const PaymentForm = () => {
                 </Typography>
               </Grid>
               <Grid item xs={8}>
-                <Typography variant="body1">Carlo Diaz</Typography>
+                <Typography variant="body1">
+                  {customer?.instructor || ""}
+                </Typography>
               </Grid>
 
               <Grid item xs={4}>
@@ -124,7 +131,7 @@ const PaymentForm = () => {
                 </Typography>
               </Grid>
               <Grid item xs={8}>
-                <Typography variant="body1">Monthly with Instructor</Typography>
+                <Typography variant="body1">{customer?.plan || ""}</Typography>
               </Grid>
 
               <Grid item xs={4}>
@@ -133,7 +140,9 @@ const PaymentForm = () => {
                 </Typography>
               </Grid>
               <Grid item xs={8}>
-                <Typography variant="body1">PHP 1,500.00</Typography>
+                <Typography variant="body1">
+                  {customer?.amount || ""}
+                </Typography>
               </Grid>
             </Grid>
           </Grid>
