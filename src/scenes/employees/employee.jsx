@@ -40,6 +40,10 @@ const Employee = () => {
     showAlert(`Attendance successfully recorded.`, "success");
   };
 
+  const handleArchiveSuccess = () => {
+    showAlert(`Employee successfully archived.`, "success");
+  };
+
   const handleError = () => {
     showAlert("An error occurred!", "error");
   };
@@ -52,6 +56,7 @@ const Employee = () => {
 
   const [AddEmployeeOpen, setAddEmployeeOpen] = useState(false);
   const [EditEmployeeOpen, setEditEmployeeOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [employees, setEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -108,14 +113,15 @@ const Employee = () => {
 
   // Fetch employees from the backend
   useEffect(() => {
+    setIsFetching(true);
     const initializeData = async () => {
       try {
         await fetchPositions();
         await fetchEmployees();
-        setLoading(false);
+        setIsFetching(false);
       } catch (error) {
         console.error("Error", error);
-        setLoading(false);
+        setIsFetching(false);
       }
     };
 
@@ -144,11 +150,33 @@ const Employee = () => {
     fetchEmployees();
   };
 
-  const handleArchive = (id) => {
-    // Archive employee logic
-    setEmployees((prevEmployees) =>
-      prevEmployees.filter((employee) => employee.id !== id)
-    );
+  const handleArchive = async (id) => {
+    try {
+      const userConfirmed = confirm(
+        "Do you want to move this employee to archive?"
+      );
+      if (!userConfirmed) return;
+
+      const response = await axios.post(
+        `http://localhost:8000/api/admin/soft-delete-staff/${id}`,
+        null, // No payload needed
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        handleArchiveSuccess();
+        fetchEmployees();
+      } else {
+        handleError();
+      }
+    } catch (error) {
+      console.error("Error archiving employee:", error);
+      handleError();
+    }
   };
 
   const handleUpdateEmployee = async () => {
@@ -199,10 +227,10 @@ const Employee = () => {
         );
 
         handleEditClose();
-        setIsFetching(false);
+        setIsLoading(false);
         handleUpdateSuccess();
       } else {
-        setIsFetching(false);
+        setIsLoading(false);
         handleError();
       }
     } catch (error) {
@@ -284,7 +312,7 @@ const Employee = () => {
           </Button>
           <Button
             variant="outlined"
-            color="error"
+            color="inherit"
             startIcon={<ArchiveOutlinedIcon />}
             onClick={() => handleArchive(params.row.id)}
           >
@@ -333,7 +361,12 @@ const Employee = () => {
           </Button>
         </Box>
 
-        <DataGrid checkboxSelection rows={employees} columns={columns} />
+        <DataGrid
+          loading={isFetching}
+          checkboxSelection
+          rows={employees}
+          columns={columns}
+        />
 
         <Dialog
           open={AddEmployeeOpen}

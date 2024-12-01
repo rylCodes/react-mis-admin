@@ -8,13 +8,32 @@ import { mockDataEmployee } from "../../data/mockData";
 import Header from "../../components/Header";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useAlert } from "../../context/AlertContext";
+import axios from "axios";
 
 const EmployeeArchive = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const { authToken } = useContext(AuthContext);
+  const showAlert = useAlert();
   const navigate = useNavigate();
+
+  const handleRestorSuccess = () => {
+    showAlert(`Employee successfully restored.`, "success");
+  };
+
+  const handleDeleteSuccess = () => {
+    showAlert(`Employee deleted permanently.`, "success");
+  };
+
+  const handleError = () => {
+    showAlert("An error occurred!", "error");
+  };
+
+  useEffect(() => {
+    fetchArchivedEmployees();
+  }, []);
 
   useEffect(() => {
     if (!authToken) {
@@ -22,39 +41,103 @@ const EmployeeArchive = () => {
     }
   }, [authToken, navigate]);
 
-  const [employees, setEmployees] = useState(mockDataEmployee);
+  const [employees, setEmployees] = useState([]);
+  const [isFetching, setIsFetching] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "info",
   });
 
-  const handleDelete = (id) => {
-    // Delete customer logic
-    setEmployees((prevEmployees) =>
-      prevEmployees.filter((employees) => employees.id !== id)
-    );
-    setSnackbar({
-      open: true,
-      message: "Customer deleted successfully!",
-      severity: "error",
-    });
+  const handleDelete = async (id) => {
+    try {
+      const userConfirmed = confirm(
+        "Do you want to delete this employee permanently? This action cannot be undone."
+      );
+      if (!userConfirmed) return;
+
+      const response = await axios.post(
+        `http://localhost:8000/api/admin/force-delete-staff/${id}`,
+        null, // No need to send a payload
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        // Update frontend state to remove the deleted staff
+        handleDeleteSuccess();
+        fetchArchivedEmployees();
+      } else {
+        handleError();
+      }
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+      handleError();
+    }
   };
 
-  const handleRestore = (id) => {
-    // Restore customer logic
-    const restoredCustomer = employees.find((employees) => employees.id === id);
-    console.log("Restored customer:", restoredCustomer);
-    setSnackbar({
-      open: true,
-      message: "Customer restored successfully!",
-      severity: "success",
-    });
+  const handleRestore = async (id) => {
+    try {
+      const userConfirmed = confirm("Do you want to restore this employee?");
+      if (!userConfirmed) return;
+
+      const response = await axios.post(
+        `http://localhost:8000/api/admin/restore-staff/${id}`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        handleRestorSuccess();
+        fetchArchivedEmployees();
+      } else {
+        handleError();
+      }
+    } catch (error) {
+      console.error("Error restoring employee:", error);
+      handleError();
+    }
   };
 
   const handleSnackbarClose = () => {
     setSnackbar({ open: false, message: "", severity: "info" });
   };
+
+  const fetchArchivedEmployees = async () => {
+    setIsFetching(true);
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/admin/archive-staff",
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      const formattedData = response.data.data.map((staff) => ({
+        id: staff.id,
+        name: staff.fullname,
+        email: staff.email,
+        sex: staff.gender,
+        phone: staff.contact_no || "N/A",
+        address: staff.address,
+        position: staff.position,
+      }));
+      setEmployees(formattedData);
+      setIsFetching(false);
+    } catch (error) {
+      console.error("Failed to fetch employees:", error);
+      setIsFetching(false);
+    }
+  };
+
   const columns = [
     { field: "id", headerName: "ID" },
     { field: "name", headerName: "Name", flex: 1 },
@@ -123,7 +206,12 @@ const EmployeeArchive = () => {
           },
         }}
       >
-        <DataGrid checkboxSelection rows={employees} columns={columns} />
+        <DataGrid
+          loading={isFetching}
+          checkboxSelection
+          rows={employees}
+          columns={columns}
+        />
         <Snackbar
           open={snackbar.open}
           autoHideDuration={3000}

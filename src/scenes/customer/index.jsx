@@ -35,9 +35,17 @@ const CustomerList = () => {
     showAlert(`Customer successfully updated.`, "success");
   };
 
-  const handleError = () => {
-    showAlert("An error occurred while updating the customer!", "error");
+  const handleArchiveSuccess = () => {
+    showAlert(`Customer successfully archived.`, "success");
   };
+
+  const handleError = () => {
+    showAlert("An error occurred!", "error");
+  };
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
 
   useEffect(() => {
     if (!authToken) {
@@ -47,6 +55,7 @@ const CustomerList = () => {
 
   const [AddCustomerOpen, setAddCustomerOpen] = useState(false);
   const [updateCustomerOpen, setUpdateCustomerOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [customer, setCustomer] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -75,29 +84,35 @@ const CustomerList = () => {
 
   const handleArchive = async (id) => {
     try {
-      // Archive by updating `is_active` to false
+      const userConfirmed = confirm(
+        "Do you want to move this customer to archive?"
+      );
+      if (!userConfirmed) return;
+
       const response = await axios.post(
-        "http://localhost:8000/api/admin/show-client",
-        { id },
+        `http://localhost:8000/api/admin/soft-delete-client/${id}`,
+        null, // No payload needed
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
           },
         }
       );
+
       if (response.status === 200) {
-        setCustomer((prevCustomer) => prevCustomer.filter((c) => c.id !== id));
-        alert("Customer archived successfully.");
+        handleArchiveSuccess();
+        fetchClients();
       } else {
-        alert("Failed to archive the customer.");
+        handleError();
       }
     } catch (error) {
-      console.error("Error archiving customer:", error);
-      alert("An error occurred while archiving the customer.");
+      console.error("Error deleting customer:", error);
+      handleError();
     }
   };
 
   const fetchClients = async () => {
+    setIsFetching(true);
     try {
       const response = await axios.get(
         "http://localhost:8000/api/admin/show-client",
@@ -123,18 +138,21 @@ const CustomerList = () => {
           isActive: client.is_active,
         }));
         setCustomer(clients);
+        setIsFetching(false);
       } else {
         console.error("Failed to fetch clients");
+        setIsFetching(false);
       }
     } catch (error) {
       console.error("Error fetching clients:", error);
+      setIsFetching(false);
     }
   };
 
   // Update customer in the API
   const handleUpdateCustomer = async () => {
     try {
-      setIsFetching(true);
+      setIsLoading(true);
       const response = await axios.post(
         `http://localhost:8000/api/admin/update-client/${selectedCustomer.id}`,
         {
@@ -167,22 +185,18 @@ const CustomerList = () => {
           )
         );
         handleUpdateClose();
-        setIsFetching(false);
+        setIsLoading(false);
         handleUpdateSuccess();
       } else {
-        setIsFetching(false);
+        setIsLoading(false);
         handleError();
       }
     } catch (error) {
       console.error("Error updating customer:", error);
-      setIsFetching(false);
+      setIsLoading(false);
       handleError();
     }
   };
-
-  useEffect(() => {
-    fetchClients();
-  }, []);
 
   const serviceOptions = [
     "Gym Per session",
@@ -271,7 +285,14 @@ const CustomerList = () => {
             Add Customer
           </Button>
         </Box>
-        <DataGrid checkboxSelection rows={customer} columns={columns} />
+
+        <DataGrid
+          loading={isFetching}
+          checkboxSelection
+          rows={customer}
+          columns={columns}
+        />
+
         <Dialog
           open={AddCustomerOpen}
           onClose={handleClose}
@@ -373,7 +394,7 @@ const CustomerList = () => {
                   variant="contained"
                   color="primary"
                   onClick={handleUpdateCustomer}
-                  disabled={isFetching}
+                  disabled={isLoading}
                 >
                   Save
                 </Button>
