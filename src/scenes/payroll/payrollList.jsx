@@ -8,6 +8,7 @@ import Header from "../../components/Header";
 import AddPayrollForm from "../payroll/addPayrollForm";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const PayrollList = () => {
   const theme = useTheme();
@@ -16,20 +17,43 @@ const PayrollList = () => {
   const { authToken } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const [AddEmployeeOpen, setAddEmployeeOpen] = useState(false);
+  const [employees, setEmployees] = useState([]);
+
   useEffect(() => {
     if (!authToken) {
       navigate("/");
+    } else {
+      fetchPayrollData();
     }
   }, [authToken, navigate]);
 
-  const [AddEmployeeOpen, setAddEmployeeOpen] = useState(false);
-  const [employees, setEmployees] = useState(mockDataEmployee);
+  const fetchPayrollData = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/admin/show-staff-payroll",
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setEmployees(response.data.data);
+      } else {
+        console.error("Failed to fetch payroll data:", response);
+      }
+    } catch (error) {
+      console.error("Error fetching payroll data:", error);
+    }
+  };
 
   const handleOpen = () => setAddEmployeeOpen(true);
   const handleClose = () => setAddEmployeeOpen(false);
 
   const handleArchive = (id) => {
-    // Delete employee logic
+    // Archive employee logic
     setEmployees((prevEmployees) =>
       prevEmployees.filter((employee) => employee.id !== id)
     );
@@ -44,9 +68,19 @@ const PayrollList = () => {
 
   const columns = [
     { field: "id", headerName: "Employee ID" },
-    { field: "title", headerName: "Title", flex: 1 },
-    { field: "from", headerName: "From", headerAlign: "left", align: "left" },
-    { field: "to", headerName: "To", flex: 1 },
+    { field: "name", headerName: "Name", flex: 1 },
+    { field: "present_day", headerName: "Present Days", flex: 1 },
+    { field: "salary", headerName: "Salary", flex: 1 },
+    { field: "overtime", headerName: "Overtime", flex: 1 },
+    { field: "yearly_bonus", headerName: "Yearly Bonus", flex: 1 },
+    { field: "sales_comission", headerName: "Sales Commission", flex: 1 },
+    { field: "incentives", headerName: "Incentives", flex: 1 },
+    { field: "sss", headerName: "SSS", flex: 1 },
+    { field: "pag_ibig", headerName: "Pag-IBIG", flex: 1 },
+    { field: "philhealth", headerName: "PhilHealth", flex: 1 },
+    { field: "net_income", headerName: "Net Income", flex: 1 },
+    { field: "total_deductions", headerName: "Total Deductions", flex: 1 },
+    { field: "final_salary", headerName: "Final Salary", flex: 1 },
     {
       field: "action",
       headerName: "Action",
