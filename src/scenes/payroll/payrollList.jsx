@@ -9,6 +9,7 @@ import AddPayrollForm from "../payroll/addPayrollForm";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Payslip from "./payslip";
 
 const PayrollList = () => {
   const theme = useTheme();
@@ -18,7 +19,51 @@ const PayrollList = () => {
   const navigate = useNavigate();
 
   const [AddEmployeeOpen, setAddEmployeeOpen] = useState(false);
+  const [staffs, setStaffs] = useState([]);
   const [employees, setEmployees] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [payslipOpen, setPayslipOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/admin/show-staff",
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      const formattedData = response.data.data.map((staff) => ({
+        id: staff.id,
+        name: staff.fullname,
+        email: staff.email,
+        sex: staff.gender,
+        phone: staff.contact_no || "N/A",
+        address: staff.address,
+        position: staff.position,
+      }));
+      setStaffs(formattedData);
+    } catch (error) {
+      console.error("Failed to fetch employees:", error);
+    }
+  };
+
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        await fetchEmployees();
+        setLoading(false);
+      } catch (error) {
+        console.error("Error", error);
+        setLoading(false);
+      }
+    };
+
+    initializeData();
+    console.log(employees);
+  }, []);
 
   useEffect(() => {
     if (!authToken) {
@@ -38,6 +83,7 @@ const PayrollList = () => {
           },
         }
       );
+      console.log(response.data);
 
       if (response.status === 200) {
         setEmployees(response.data.data);
@@ -51,6 +97,9 @@ const PayrollList = () => {
 
   const handleOpen = () => setAddEmployeeOpen(true);
   const handleClose = () => setAddEmployeeOpen(false);
+  const handlePayslipClose = () => {
+    setPayslipOpen(false);
+  };
 
   const handleArchive = (id) => {
     // Archive employee logic
@@ -64,6 +113,11 @@ const PayrollList = () => {
       ...prevEmployees,
       { id: prevEmployees.length + 1, ...newEmployee }, // Adding new employee data
     ]);
+  };
+
+  const handleViewPayslip = (employee = {}) => {
+    setSelectedEmployee(employee);
+    setPayslipOpen(true);
   };
 
   const columns = [
@@ -94,6 +148,13 @@ const PayrollList = () => {
             onClick={() => handleArchive(params.row.id)}
           >
             Archive
+          </Button>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => handleViewPayslip(params.row)}
+          >
+            View Payslip
           </Button>
         </Box>
       ),
@@ -150,8 +211,31 @@ const PayrollList = () => {
             <AddPayrollForm
               closeModal={handleClose}
               onAddEmployee={handleAddEmployee}
+              payslipOpen={payslipOpen}
+              handleViewPayslip={handleViewPayslip}
+              handlePayslipClose={handlePayslipClose}
+              staffs={staffs}
             />
           </DialogContent>
+        </Dialog>
+
+        <Dialog open={payslipOpen} onClose={handlePayslipClose}>
+          <div
+            style={{
+              position: "fixed",
+              width: "100%",
+              maxHeight: "100vh",
+              inset: 0,
+              overflowY: "auto",
+            }}
+          >
+            {selectedEmployee && (
+              <Payslip
+                selectedEmployee={selectedEmployee}
+                handlePayslipClose={handlePayslipClose}
+              />
+            )}
+          </div>
         </Dialog>
       </Box>
     </Box>

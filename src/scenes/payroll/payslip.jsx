@@ -18,7 +18,7 @@ import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { jsPDF } from "jspdf"; // Import jsPDF
 import { AuthContext } from "../../context/AuthContext";
 
-const PaySlip = () => {
+const PaySlip = ({ selectedEmployee, handlePayslipClose }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -31,6 +31,10 @@ const PaySlip = () => {
     }
   }, [authToken, navigate]);
 
+  useEffect(() => {
+    console.log("selectedEmployee", selectedEmployee);
+  }, []);
+
   const [isVisible, setIsVisible] = useState(true); // State to toggle visibility
 
   const handleCancel = () => {
@@ -39,22 +43,61 @@ const PaySlip = () => {
   };
 
   const deductions = [
-    { label: "Vale", amount: "191.24" },
-    { label: "SSS", amount: "163.13" },
-    { label: "PHILHEALTH", amount: "71.50" },
-    { label: "PAG-IBIG", amount: "25.00" },
-    { label: "Late/Undertime", amount: "354.00" },
+    { label: "Vale", amount: selectedEmployee?.vale || "" },
+    { label: "SSS", amount: selectedEmployee?.sss || "" },
+    { label: "PHILHEALTH", amount: selectedEmployee?.philhealth || "" },
+    { label: "PAG-IBIG", amount: selectedEmployee?.pag_ibig || "" },
+    {
+      label: "Late/Undertime",
+      amount: selectedEmployee?.undertime || "",
+    },
   ];
+
+  const getDateRange = (startDate, endDate) => {
+    if (!startDate || !endDate) return "--";
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const options = { day: "numeric", month: "short" };
+    return `${start.toLocaleDateString(
+      "en-US",
+      options
+    )}-${end.toLocaleDateString("en-US", options)}`;
+  };
 
   const breakdowns = [
-    "Vale on: 1/31/24",
-    "SSS for 1-4 FEB as of 02/03/24",
-    "PHL for 1-4 FEB as of 02/03/24",
-    "PAG-IBIG for 1-4 FEB as of 02/03/24",
-    "Jan 29, 30, 31, Feb 01, 02 = 36hrs",
+    `Vale on: ${
+      selectedEmployee?.end_date ? formatDate(selectedEmployee.end_date) : "--"
+    }`,
+    `SSS for ${getDateRange(
+      selectedEmployee?.start_date,
+      selectedEmployee?.end_date
+    )} as of ${
+      selectedEmployee?.end_date ? formatDate(selectedEmployee.end_date) : "--"
+    }`,
+    `PHL for ${getDateRange(
+      selectedEmployee?.start_date,
+      selectedEmployee?.end_date
+    )} as of ${
+      selectedEmployee?.end_date ? formatDate(selectedEmployee.end_date) : "--"
+    }`,
+    `PAG-IBIG for ${getDateRange(
+      selectedEmployee?.start_date,
+      selectedEmployee?.end_date
+    )} as of ${
+      selectedEmployee?.end_date ? formatDate(selectedEmployee.end_date) : "--"
+    }`,
+    `${
+      selectedEmployee?.start_date
+        ? formatDate(selectedEmployee.start_date)
+        : "--"
+    }, ${
+      selectedEmployee?.end_date ? formatDate(selectedEmployee.end_date) : "--"
+    } = ${
+      selectedEmployee?.present_day ? selectedEmployee.present_day * 8 : "--"
+    } hrs`,
   ];
-
-  if (!isVisible) return null; // If not visible, don't render anything
 
   // Handle Print Action
   const handlePrint = () => {
@@ -65,10 +108,20 @@ const PaySlip = () => {
   const handleSave = () => {
     const doc = new jsPDF();
     doc.text("PAY SLIP", 20, 10);
-    doc.text("Payroll Period: Jan. 29 - Feb. 03, 2024", 20, 20);
+    doc.text(
+      `Payroll Period: ${selectedEmployee?.start_date || ""} - ${
+        selectedEmployee?.end_date || ""
+      }`,
+      20,
+      20
+    );
     doc.text("Employer: GYM DEPOT CORPORATION", 20, 30);
-    doc.text("Employee: Puti, John", 20, 40);
-    doc.text("Date of Payment: February 3, 2024", 20, 50);
+    doc.text(`Employee: ${selectedEmployee.name}`, 20, 40);
+    doc.text(
+      `Date of Payment: ${selectedEmployee?.payment_date || ""}`,
+      20,
+      50
+    );
     doc.text("Mode of Payment: Cash", 20, 60);
     doc.save("payslip.pdf"); // This will download the generated PDF
   };
@@ -100,7 +153,8 @@ const PaySlip = () => {
                   padding: "8px 16px",
                 }}
               >
-                Payroll Period: Jan. 29 - Feb. 03, 2024
+                Payroll Period: {selectedEmployee?.start_date || ""} -{" "}
+                {selectedEmployee?.end_date || ""}
               </Typography>
               <Typography
                 variant="h6"
@@ -117,9 +171,9 @@ const PaySlip = () => {
                   padding: "8px 16px",
                 }}
               >
-                Name of Employee: Puti, John
+                Name of Employee: {selectedEmployee.name}
               </Typography>
-              <Typography>Employee No.#: 01</Typography>
+              <Typography>Employee No.#: {selectedEmployee.name}</Typography>
             </Grid>
             <Grid item xs={6}>
               <Typography
@@ -139,7 +193,7 @@ const PaySlip = () => {
                   padding: "22px 16px",
                 }}
               >
-                February 3, 2024
+                {selectedEmployee?.payment_date || ""}
               </Typography>
               <Typography
                 sx={{
@@ -170,13 +224,13 @@ const PaySlip = () => {
                         align="right"
                         sx={{ color: "#333", padding: "8px 16px" }}
                       >
-                        6
+                        {selectedEmployee.present_day}
                       </TableCell>
                       <TableCell
                         align="right"
                         sx={{ color: "#333", padding: "8px 16px" }}
                       >
-                        3,300.00
+                        {selectedEmployee.net_income}
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -187,7 +241,7 @@ const PaySlip = () => {
                         align="right"
                         sx={{ color: "#333", padding: "8px 16px" }}
                       >
-                        0.00
+                        {selectedEmployee.overtime}
                       </TableCell>
                       <TableCell
                         align="right"
@@ -211,7 +265,7 @@ const PaySlip = () => {
                         align="right"
                         sx={{ color: "#333", padding: "8px 16px" }}
                       >
-                        3,300.00
+                        {selectedEmployee.net_income}
                       </TableCell>
                     </TableRow>
 
@@ -245,7 +299,7 @@ const PaySlip = () => {
                         align="right"
                         sx={{ color: "#333", padding: "8px 16px" }}
                       >
-                        -682.44
+                        {selectedEmployee.total_deductions}
                       </TableCell>
                     </TableRow>
                   </TableBody>
@@ -278,7 +332,7 @@ const PaySlip = () => {
           sx={{ color: "#333", paddingTop: "20px", marginTop: "15px" }}
         >
           <Typography variant="h5" fontWeight="bold">
-            NET PAY.....P 2,617.56
+            NET PAY.....P {selectedEmployee.final_salary}
           </Typography>
         </Box>
       </Paper>
@@ -301,7 +355,7 @@ const PaySlip = () => {
         >
           Save
         </Button>
-        <Button variant="outlined" color="error" onClick={handleCancel}>
+        <Button variant="outlined" color="error" onClick={handlePayslipClose}>
           Cancel
         </Button>
       </Box>
