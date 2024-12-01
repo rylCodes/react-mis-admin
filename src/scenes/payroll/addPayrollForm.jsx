@@ -17,14 +17,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import axios from "axios";
-import Payslip from "./payslip";
 
 const AddPayrollForm = ({
   closeModal,
   onAddEmployee,
-  payslipOpen,
   handleViewPayslip,
-  handlePayslipClose,
   staffs,
 }) => {
   const { authToken } = useContext(AuthContext);
@@ -43,6 +40,7 @@ const AddPayrollForm = ({
     start_date: "", // Date From
     end_date: "", // Date To
     present_day: null,
+    pay_date: "",
     overtime: 0,
     yearly_bonus: 0,
     sales_comission: 0,
@@ -52,8 +50,6 @@ const AddPayrollForm = ({
     philhealth: 0,
     underTime: 0,
   });
-
-  const [payrollData, setPayrollData] = useState({});
 
   const [openModal, setOpenModal] = useState(false);
 
@@ -83,13 +79,15 @@ const AddPayrollForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log(employeeData);
       const response = await axios.post(
         `http://localhost:8000/api/admin/store-staff-payroll/${employeeData.staff_id}`,
         {
           staff_id: employeeData.staff_id,
           start_date: employeeData.start_date,
           end_date: employeeData.end_date,
-          overtime: employeeData.overtime,
+          pay_date: employeeData.pay_date,
+          over_time: employeeData.overtime,
           yearly_bonus: employeeData.yearly_bonus,
           sales_comission: employeeData.sales_comission,
           incentives: employeeData.incentives,
@@ -102,13 +100,13 @@ const AddPayrollForm = ({
       );
 
       if (response.status === 200) {
-        onAddEmployee(response.data.data);
+        const payrollData = response.data.data;
+        onAddEmployee(payrollData);
         // navigate("/payslip", { state: { employeeData } });
-        console.log(response.data);
-        setPayrollData(response.data.data);
+        console.log("response.data", payrollData);
         closeModal();
         handleCloseModal();
-        handleViewPayslip();
+        handleViewPayslip(payrollData);
       } else {
         console.error("Failed to store payroll data:", response);
       }
@@ -163,7 +161,7 @@ const AddPayrollForm = ({
             required
           />
           <Box mt={3} display="flex" justifyContent="space-between">
-            <Button variant="outlined" onClick={closeModal}>
+            <Button variant="outlined" color="error" onClick={closeModal}>
               Cancel
             </Button>
             <Button
@@ -171,7 +169,11 @@ const AddPayrollForm = ({
               variant="contained"
               color="primary"
               onClick={handleNext}
-              disabled={!employeeData.start_date || !employeeData.end_date}
+              disabled={
+                !employeeData.start_date ||
+                !employeeData.end_date ||
+                !employeeData.staff_id
+              }
             >
               Next
             </Button>
@@ -183,7 +185,7 @@ const AddPayrollForm = ({
         <Dialog open={openModal} onClose={handleCloseModal}>
           <DialogTitle>Salary Inclusion</DialogTitle>
           <DialogContent>
-            <Grid container spacing={2} padding={2}>
+            <Grid container spacing={2} paddingTop={2}>
               <Grid item xs={6}>
                 <TextField
                   label="Employee ID"
@@ -191,18 +193,26 @@ const AddPayrollForm = ({
                   value={employeeData.staff_id}
                   fullWidth
                   disabled
-                  error={!employeeData.staff_id}
                 />
               </Grid>
               <Grid item xs={6}>
-                <TextField
+                {/* <TextField
                   label="Present Days"
                   name="present_day"
                   value={employeeData.end_date - employeeData.start_date}
                   onChange={handleChange}
                   fullWidth
                   type="number"
-                  disabled
+                /> */}
+                <TextField
+                  label="Payment Date"
+                  name="pay_date"
+                  value={employeeData.pay_date || ""}
+                  onChange={handleChange}
+                  fullWidth
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  required
                 />
               </Grid>
             </Grid>
@@ -310,31 +320,16 @@ const AddPayrollForm = ({
             <Button onClick={handleCloseModal} color="error">
               Cancel
             </Button>
-            <Button onClick={handleSubmit} color="secondary">
+            <Button
+              onClick={handleSubmit}
+              color="secondary"
+              disabled={!employeeData.pay_date}
+            >
               Save and Go to Payslip
             </Button>
           </DialogActions>
         </Dialog>
       )}
-
-      <Dialog open={payslipOpen} onClose={handlePayslipClose}>
-        <div
-          style={{
-            position: "fixed",
-            width: "100%",
-            maxHeight: "100vh",
-            inset: 0,
-            overflowY: "auto",
-          }}
-        >
-          {employeeData && (
-            <Payslip
-              selectedEmployee={payrollData}
-              handlePayslipClose={handlePayslipClose}
-            />
-          )}
-        </div>
-      </Dialog>
     </Box>
   );
 };

@@ -52,9 +52,11 @@ const PayrollList = () => {
 
   useEffect(() => {
     const initializeData = async () => {
+      setLoading(true);
       try {
-        await fetchEmployees();
+        await fetchPayrollData();
         setLoading(false);
+        await fetchEmployees();
       } catch (error) {
         console.error("Error", error);
         setLoading(false);
@@ -68,8 +70,6 @@ const PayrollList = () => {
   useEffect(() => {
     if (!authToken) {
       navigate("/");
-    } else {
-      fetchPayrollData();
     }
   }, [authToken, navigate]);
 
@@ -83,7 +83,7 @@ const PayrollList = () => {
           },
         }
       );
-      console.log(response.data);
+      console.log("payroll", response.data);
 
       if (response.status === 200) {
         setEmployees(response.data.data);
@@ -115,7 +115,7 @@ const PayrollList = () => {
     ]);
   };
 
-  const handleViewPayslip = (employee = {}) => {
+  const handleViewPayslip = (employee = null) => {
     setSelectedEmployee(employee);
     setPayslipOpen(true);
   };
@@ -199,7 +199,12 @@ const PayrollList = () => {
           </Button>
         </Box>
 
-        <DataGrid checkboxSelection rows={employees} columns={columns} />
+        <DataGrid
+          loading={loading}
+          checkboxSelection
+          rows={employees}
+          columns={columns}
+        />
 
         <Dialog
           open={AddEmployeeOpen}

@@ -66,6 +66,11 @@ const PaySlip = ({ selectedEmployee, handlePayslipClose }) => {
     )}-${end.toLocaleDateString("en-US", options)}`;
   };
 
+  const formatDate = (date) => {
+    const options = { year: "numeric", month: "short", day: "2-digit" };
+    return new Date(date).toLocaleDateString("en-US", options);
+  };
+
   const breakdowns = [
     `Vale on: ${
       selectedEmployee?.end_date ? formatDate(selectedEmployee.end_date) : "--"
@@ -117,11 +122,7 @@ const PaySlip = ({ selectedEmployee, handlePayslipClose }) => {
     );
     doc.text("Employer: GYM DEPOT CORPORATION", 20, 30);
     doc.text(`Employee: ${selectedEmployee.name}`, 20, 40);
-    doc.text(
-      `Date of Payment: ${selectedEmployee?.payment_date || ""}`,
-      20,
-      50
-    );
+    doc.text(`Date of Payment: ${selectedEmployee?.pay_date || ""}`, 20, 50);
     doc.text("Mode of Payment: Cash", 20, 60);
     doc.save("payslip.pdf"); // This will download the generated PDF
   };
@@ -193,7 +194,7 @@ const PaySlip = ({ selectedEmployee, handlePayslipClose }) => {
                   padding: "22px 16px",
                 }}
               >
-                {selectedEmployee?.payment_date || ""}
+                {selectedEmployee?.pay_date || ""}
               </Typography>
               <Typography
                 sx={{
