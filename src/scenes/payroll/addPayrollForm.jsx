@@ -10,8 +10,9 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for routing
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
+import axios from "axios";
 
 const AddPayrollForm = ({ closeModal, onAddEmployee }) => {
   const { authToken } = useContext(AuthContext);
@@ -22,13 +23,13 @@ const AddPayrollForm = ({ closeModal, onAddEmployee }) => {
       navigate("/");
     }
   }, [authToken, navigate]);
+
   const [step, setStep] = useState(1); // Track the current step (1: Basic Details, 2: Salary Details)
 
   const [employeeData, setEmployeeData] = useState({
     employeeID: "",
     dateFrom: "", // Date From
     dateTo: "", // Date To
-    presentDays: "", // Present Days
     earnings: {
       overtime: 0,
       yearlyBonus: 0,
@@ -43,16 +44,13 @@ const AddPayrollForm = ({ closeModal, onAddEmployee }) => {
     },
   });
 
-  const [openModal, setOpenModal] = useState(false); // State to open and close modal
+  const [openModal, setOpenModal] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    // If the value is empty, treat it as an empty string or handle numeric fields
     const numericValue =
       value === "" ? "" : !isNaN(value) ? parseFloat(value) : value;
 
-    // Handle nested fields for earnings and deductions
     if (name in employeeData.earnings) {
       setEmployeeData((prevData) => ({
         ...prevData,
@@ -79,19 +77,45 @@ const AddPayrollForm = ({ closeModal, onAddEmployee }) => {
 
   const handleNext = (e) => {
     e.preventDefault();
-    setStep(2); // Switch to the salary details step
-    setOpenModal(true); // Open the modal when Next is clicked
+    setStep(2);
+    setOpenModal(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onAddEmployee(employeeData);
-    navigate("/payslip", { state: { employeeData } }); // Navigate to payslip page after saving
-    closeModal(); // Close the modal after submission
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/api/admin/store-staff-payroll/${employeeData.employeeID}`,
+        {
+          staff_id: employeeData.employeeID,
+          start_date: employeeData.dateFrom,
+          end_date: employeeData.dateTo,
+          over_time: employeeData.earnings.overtime,
+          yearly_bonus: employeeData.earnings.yearlyBonus,
+          sales_comission: employeeData.earnings.salesCommission,
+          incentives: employeeData.earnings.taripaIncentives,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        onAddEmployee(employeeData);
+        navigate("/payslip", { state: { employeeData } });
+        closeModal();
+      } else {
+        console.error("Failed to store payroll data:", response);
+      }
+    } catch (error) {
+      console.error("Error storing payroll data:", error);
+    }
   };
 
   const handleCloseModal = () => {
-    setOpenModal(false); // Close modal when canceled
+    setOpenModal(false);
   };
 
   return (
@@ -144,7 +168,6 @@ const AddPayrollForm = ({ closeModal, onAddEmployee }) => {
         </Button>
       </Box>
 
-      {/* Modal for Salary Inclusion */}
       <Dialog open={openModal} onClose={handleCloseModal}>
         <DialogTitle>Salary Inclusion</DialogTitle>
         <DialogContent>
@@ -169,7 +192,6 @@ const AddPayrollForm = ({ closeModal, onAddEmployee }) => {
             </Grid>
           </Grid>
 
-          {/* Earnings Table */}
           <Box mt={2}>
             <Typography variant="h6" padding={2}>
               Earnings
@@ -218,7 +240,6 @@ const AddPayrollForm = ({ closeModal, onAddEmployee }) => {
             </Grid>
           </Box>
 
-          {/* Deductions Table */}
           <Box mt={2}>
             <Typography variant="h6" padding={2}>
               Deductions
