@@ -6,12 +6,15 @@ import {
   Button,
   Grid,
   Paper,
+  MenuItem,
   useTheme,
 } from "@mui/material";
+import axios from "axios";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useAlert } from "../../context/AlertContext";
 
 const sections = [
   { id: "edit", label: "Edit Logo" },
@@ -36,36 +39,117 @@ const SystemVariable = () => {
   const colors = tokens(theme.palette.mode);
 
   const { authToken } = useContext(AuthContext);
+  const showAlert = useAlert();
   const navigate = useNavigate();
+
+  const handleUpdateSuccess = () => {
+    showAlert(`Section successfully updated.`, "success");
+  };
+
+  const handleError = () => {
+    showAlert("An error occurred!", "error");
+  };
+
+  const [selectedSection, setSelectedSection] = useState(null);
+  const [image, setImage] = useState(null);
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [plan, setPlan] = useState("");
+  const [description, setDescription] = useState("");
+  const [exercises, setExercises] = useState([]);
+  const [exerciseId, setExerciseId] = useState(null);
 
   useEffect(() => {
     if (!authToken) {
       navigate("/");
+    } else {
+      fetchExercises();
     }
   }, [authToken, navigate]);
 
-  const [selectedSection, setSelectedSection] = useState("edit-discount");
-  const [setImage] = useState(null);
-  const [description, setDescription] = useState(
-    "STUDENT PROMO IS BACK.\nPresent your ID or any proof that you are a student / or graduating student/s for this school year 2023-2024.\nPROMO RUNS UNTIL July 4, 2024."
-  );
+  const fetchExercises = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/admin/show-exercise",
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setExercises(response.data.data);
+      } else {
+        console.error("Failed to fetch exercises:", response);
+      }
+    } catch (error) {
+      console.error("Error fetching exercises:", error.message);
+    }
+  };
 
   const handleSectionSelect = (sectionId) => {
     setSelectedSection(sectionId);
-    setImage(null); // Reset image when switching sections
-    setDescription(""); // Reset description for the new section
+    const selectedExercise = exercises.find(
+      (exercise) => exercise.id === sectionId
+    );
+
+    if (selectedExercise) {
+      setExerciseId(selectedExercise.id);
+      setPrice(selectedExercise.price || "");
+      setName(selectedExercise.name || "");
+      setPlan(selectedExercise.plan || "session");
+      setDescription(selectedExercise.description || "");
+    } else {
+      setExerciseId(null);
+      setPrice("");
+      setPlan("");
+      setDescription("");
+    }
+    setImage(null);
   };
 
   const handleImageChange = (event) => {
     setImage(event.target.files[0]);
   };
 
-  const handleDescriptionChange = (event) => {
-    setDescription(event.target.value);
-  };
+  const handleUpdate = async () => {
+    const endpoint = exerciseId
+      ? `http://localhost:8000/api/admin/update-exercise/${exerciseId}`
+      : "http://localhost:8000/api/admin/store-exercise";
 
-  const handleUpdate = () => {
-    alert(`Updated ${selectedSection} with description: ${description}`);
+    const payload = {
+      name,
+      price,
+      plan,
+      description,
+    };
+
+    try {
+      const response = await axios.post(endpoint, payload, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        alert(`Exercise ${exerciseId ? "updated" : "created"} successfully!`);
+        fetchExercises();
+        handleUpdateSuccess();
+      } else {
+        console.error(
+          `Failed to ${exerciseId ? "update" : "create"} exercise:`,
+          response
+        );
+        handleError();
+      }
+    } catch (error) {
+      console.error(
+        `Error ${exerciseId ? "updating" : "creating"} exercise:`,
+        error.message
+      );
+      handleError();
+    }
   };
 
   return (
@@ -81,14 +165,14 @@ const SystemVariable = () => {
           Select a Section to Edit
         </Typography>
         <Grid container spacing={2}>
-          {sections.map((section) => (
+          {exercises.map((section) => (
             <Grid item key={section.id}>
               <Button
                 variant="contained"
                 color={selectedSection === section.id ? "secondary" : "primary"}
                 onClick={() => handleSectionSelect(section.id)}
               >
-                {section.label}
+                {section.label || section.name}
               </Button>
             </Grid>
           ))}
@@ -101,18 +185,15 @@ const SystemVariable = () => {
         sx={{ padding: 3, backgroundColor: colors.primary[400] }}
       >
         <Typography variant="h6" gutterBottom>
-          {sections.find((section) => section.id === selectedSection)?.label}
+          {exercises.find((section) => section.id === selectedSection)?.name ||
+            "Section"}
         </Typography>
 
-        <Grid
-          container
-          spacing={2}
-          alignItems="center"
-          sx={{ marginBottom: 3 }}
-        >
+        {/* Image Input */}
+        <Grid container spacing={2} sx={{ marginBottom: 3 }}>
           <Grid item xs={12} md={6}>
             <Typography variant="body2">
-              Please upload an image (in .jpg, .png only)
+              Please upload an image (.jpg, .png only)
             </Typography>
             <input
               type="file"
@@ -123,23 +204,75 @@ const SystemVariable = () => {
           </Grid>
         </Grid>
 
-        <Grid container spacing={4}>
+        {!exerciseId && (
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                label="Name"
+                fullWidth
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                variant="outlined"
+              />
+            </Grid>
+          </Grid>
+        )}
+
+        {/* Price Input */}
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TextField
+              label="Price"
+              fullWidth
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              variant="outlined"
+            />
+          </Grid>
+        </Grid>
+
+        {/* Plan Input */}
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TextField
+              select
+              label="Plan"
+              fullWidth
+              value={plan}
+              onChange={(e) => setPlan(e.target.value)}
+              variant="outlined"
+            >
+              <MenuItem value="session">Session</MenuItem>
+              <MenuItem value="monthly">Monthly</MenuItem>
+            </TextField>
+          </Grid>
+        </Grid>
+
+        {/* Description Input */}
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
               label="Description"
               multiline
-              rows={6}
+              rows={4}
               fullWidth
               value={description}
-              onChange={handleDescriptionChange}
+              onChange={(e) => setDescription(e.target.value)}
               variant="outlined"
             />
           </Grid>
-          <Grid item xs={12} display="flex" justifyContent="flex-end">
-            <Button variant="contained" color="primary" onClick={handleUpdate}>
-              Update
-            </Button>
-          </Grid>
+        </Grid>
+
+        {/* Action Button */}
+        <Grid
+          container
+          spacing={2}
+          sx={{ marginTop: 3 }}
+          justifyContent="flex-end"
+        >
+          <Button variant="contained" color="primary" onClick={handleUpdate}>
+            {exerciseId ? "Update" : "Create"}
+          </Button>
         </Grid>
       </Paper>
     </Box>
