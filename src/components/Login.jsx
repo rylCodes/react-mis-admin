@@ -152,11 +152,11 @@ const Login = () => {
           </Button>
         </form>
         {/* Link to Sign Up Page */}
-        <Typography>
+        {/* <Typography>
           <Link href="/signup" style={{ textDecoration: "none" }}>
             Don't have an account? Sign Up
           </Link>
-        </Typography>
+        </Typography> */}
       </Paper>
     </Grid>
   );

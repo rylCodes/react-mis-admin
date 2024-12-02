@@ -1,102 +1,97 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   useTheme,
   Container,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   TextField,
   Button,
   Grid,
-  FormHelperText,
   Box,
 } from "@mui/material";
 import { tokens } from "../theme";
-import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // For navigation
+import axios from "axios"; // For making API requests
 
 const ForgotPassword = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate(); // Initialize navigation
 
-  const { authToken } = useContext(AuthContext);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!authToken) {
-      navigate("/");
-    }
-  }, [authToken, navigate]);
-
-  const questions = [
-    "What is your favorite color?",
-    "What was the name of your pet?",
-    "When was the gym built?",
-  ];
-
-  const [selectedQuestions, setSelectedQuestions] = useState({
-    question1: "",
-    question2: "",
-    question3: "",
+  const [secretKeywords, setSecretKeywords] = useState({
+    keyword1: "",
+    keyword2: "",
+    keyword3: "",
   });
-  const [answers, setAnswers] = useState({
-    answer1: "",
-    answer2: "",
-    answer3: "",
-  });
-  const [error, setError] = useState(false); // State to manage error handling
 
-  const handleQuestionChange = (event, questionKey) => {
-    setSelectedQuestions((prev) => ({
+  const [error, setError] = useState({
+    keyword1: false,
+    keyword2: false,
+    keyword3: false,
+  });
+
+  const [loading, setLoading] = useState(false); // To handle loading state
+
+  // Handle the keyword input changes
+  const handleKeywordChange = (event, keywordKey) => {
+    setSecretKeywords((prev) => ({
       ...prev,
-      [questionKey]: event.target.value,
+      [keywordKey]: event.target.value,
     }));
   };
 
-  const handleAnswerChange = (event, answerKey) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [answerKey]: event.target.value,
-    }));
-  };
+  // Handle form submission
+  const handleConfirm = async () => {
+    // Validate input fields
+    const newError = {
+      keyword1: !secretKeywords.keyword1,
+      keyword2: !secretKeywords.keyword2,
+      keyword3: !secretKeywords.keyword3,
+    };
 
-  const handleConfirm = () => {
-    if (
-      Object.values(selectedQuestions).every((q) => q) &&
-      Object.values(answers).every((a) => a)
-    ) {
-      // Simulate answering correctly
-      alert(
-        `Questions and Answers:\n1. ${selectedQuestions.question1}: ${answers.answer1}\n2. ${selectedQuestions.question2}: ${answers.answer2}\n3. ${selectedQuestions.question3}: ${answers.answer3}`
-      );
-      // Redirect to the password reset page
-      window.location.href = "/change-password"; // Redirect to reset password page
-    } else {
-      setError(true); // Trigger error state if some fields are empty
+    setError(newError);
+
+    // If no errors, proceed to send data
+    if (!Object.values(newError).some((value) => value)) {
+      setLoading(true);
+      try {
+        const response = await axios.post(
+          "https://your-api-url.com/api/admin/add-security-answer", // Update with your actual API endpoint
+          {
+            secret_keyword_1: secretKeywords.keyword1,
+            secret_keyword_2: secretKeywords.keyword2,
+            secret_keyword_3: secretKeywords.keyword3,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`, // Token if needed
+            },
+          }
+        );
+        alert(response.data.message); // Show success message
+        navigate("/change-password"); // Navigate to password reset page
+      } catch (error) {
+        // Handle API error
+        console.error("Error submitting secret keywords:", error);
+        alert(
+          error.response?.data?.error || "An error occurred. Please try again."
+        );
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
+  // Reset form
   const handleCancel = () => {
-    setSelectedQuestions({
-      question1: "",
-      question2: "",
-      question3: "",
+    setSecretKeywords({
+      keyword1: "",
+      keyword2: "",
+      keyword3: "",
     });
-    setAnswers({
-      answer1: "",
-      answer2: "",
-      answer3: "",
+    setError({
+      keyword1: false,
+      keyword2: false,
+      keyword3: false,
     });
-    setError(false);
-  };
-
-  const getAvailableQuestions = (selectedKey) => {
-    return questions.filter(
-      (q) =>
-        !Object.values(selectedQuestions).includes(q) ||
-        selectedQuestions[selectedKey] === q
-    );
   };
 
   return (
@@ -104,57 +99,29 @@ const ForgotPassword = () => {
       maxWidth="sm"
       sx={{
         marginTop: 5,
-        backgroundColor: colors.primary[400], // Light background color
+        backgroundColor: colors.primary[400],
         padding: 3,
         borderRadius: 2,
         boxShadow: 3,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
       }}
     >
       <Box sx={{ textAlign: "center", marginBottom: 4 }}>
         <h2>Forgot Password</h2>
-        <p>Answer the following security questions to proceed.</p>
+        <p>Enter your secret keywords to proceed.</p>
       </Box>
 
       <Grid container spacing={2}>
-        {["question1", "question2", "question3"].map((questionKey, index) => (
-          <Grid item xs={12} key={questionKey}>
-            <FormControl
-              fullWidth
-              margin="normal"
-              error={error && !selectedQuestions[questionKey]}
-            >
-              <InputLabel>Question {index + 1}</InputLabel>
-              <Select
-                value={selectedQuestions[questionKey]}
-                onChange={(e) => handleQuestionChange(e, questionKey)}
-              >
-                {getAvailableQuestions(questionKey).map((q, i) => (
-                  <MenuItem value={q} key={i}>
-                    {q}
-                  </MenuItem>
-                ))}
-              </Select>
-              {error && !selectedQuestions[questionKey] && (
-                <FormHelperText>
-                  Question {index + 1} is required
-                </FormHelperText>
-              )}
-            </FormControl>
-
+        {["keyword1", "keyword2", "keyword3"].map((keywordKey, index) => (
+          <Grid item xs={12} key={keywordKey}>
             <TextField
               fullWidth
               margin="normal"
-              label={`Answer ${index + 1}`}
-              value={answers[`answer${index + 1}`]}
-              onChange={(e) => handleAnswerChange(e, `answer${index + 1}`)}
-              error={error && !answers[`answer${index + 1}`]}
-              helperText={
-                error && !answers[`answer${index + 1}`]
-                  ? "Answer is required"
-                  : ""
-              }
+              label={`Secret Keyword ${index + 1}`}
+              type="password" // Using password type for security
+              value={secretKeywords[keywordKey]}
+              onChange={(e) => handleKeywordChange(e, keywordKey)}
+              error={error[keywordKey]}
+              helperText={error[keywordKey] ? "Secret keyword is required" : ""}
             />
           </Grid>
         ))}
@@ -167,8 +134,9 @@ const ForgotPassword = () => {
             color="primary"
             onClick={handleConfirm}
             sx={{ width: "100%" }}
+            disabled={loading}
           >
-            Confirm
+            {loading ? "Submitting..." : "Confirm"}
           </Button>
         </Grid>
         <Grid item xs={6}>
@@ -177,6 +145,7 @@ const ForgotPassword = () => {
             color="secondary"
             onClick={handleCancel}
             sx={{ width: "100%" }}
+            disabled={loading}
           >
             Cancel
           </Button>
