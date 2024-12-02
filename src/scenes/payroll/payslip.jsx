@@ -339,7 +339,12 @@ const PaySlip = ({ selectedEmployee, handlePayslipClose }) => {
       </Paper>
 
       {/* Buttons moved outside the main Box */}
-      <Box p={4} textAlign="center" sx={{ marginTop: "20px" }}>
+      <Box
+        className={"no-print"}
+        p={4}
+        textAlign="center"
+        sx={{ marginTop: "20px" }}
+      >
         <Button
           variant="contained"
           color="primary"
@@ -365,3 +370,18 @@ const PaySlip = ({ selectedEmployee, handlePayslipClose }) => {
 };
 
 export default PaySlip;
+
+/* CSS for print */
+const styles = `
+@media print {
+  .no-print {
+    display: none;
+  }
+}
+`;
+
+// Append styles to document head
+const styleSheet = document.createElement("style");
+styleSheet.type = "text/css";
+styleSheet.innerText = styles;
+document.head.appendChild(styleSheet);
