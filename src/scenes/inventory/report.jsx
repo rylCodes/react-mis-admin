@@ -22,11 +22,9 @@ import { useAlert } from "../../context/AlertContext";
 const Report = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-
   const { authToken } = useContext(AuthContext);
   const navigate = useNavigate();
   const showAlert = useAlert();
-
   const [inventoryData, setInventoryData] = useState([]);
   const [isDialogOpen, setDialogOpen] = useState(false);
 
@@ -49,16 +47,13 @@ const Report = () => {
           console.error("Error fetching inventory data:", error);
         }
       };
-
       fetchInventoryData();
     }
   }, [authToken, navigate]);
 
   const getTotalItems = () => inventoryData.length;
-
   const getTotalStockLevel = () =>
     inventoryData.reduce((total, item) => total + item.quantity, 0);
-
   const getTotalPrice = () =>
     inventoryData
       .reduce(
@@ -66,10 +61,8 @@ const Report = () => {
         0
       )
       .toFixed(2);
-
   const getTotalItemsByType = (type) =>
     inventoryData.filter((item) => item.type === type).length;
-
   const getTotalPriceByType = (type) => {
     const total = inventoryData
       .filter((item) => item.type === type)
@@ -79,7 +72,6 @@ const Report = () => {
       );
     return total.toFixed(2);
   };
-
   const getMinInventoryItem = () => {
     if (inventoryData.length === 0) return { name: "N/A", quantity: 0 };
     return inventoryData.reduce(
@@ -87,7 +79,6 @@ const Report = () => {
       inventoryData[0]
     );
   };
-
   const getMaxInventoryItem = () => {
     if (inventoryData.length === 0) return { name: "N/A", quantity: 0 };
     return inventoryData.reduce(
@@ -106,21 +97,18 @@ const Report = () => {
       item.quantity,
       item.price,
     ]);
-
     let csvContent =
       "data:text/csv;charset=utf-8," +
       headers.join(",") +
       "\n" +
       rows.map((row) => row.join(",")).join("\n");
-
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
     link.setAttribute("download", "inventory_report.csv");
     document.body.appendChild(link);
     link.click();
-
-    setDialogOpen(false); // Close the dialog after downloading
+    setDialogOpen(false);
   };
 
   const handleDownloadClick = () => {
@@ -133,60 +121,117 @@ const Report = () => {
         title="Inventory Report"
         subtitle="Generate reports on inventory data"
       />
-      <Paper
-        elevation={3}
-        sx={{ padding: 3, backgroundColor: colors.primary[400] }}
-      >
-        <Typography variant="h6" gutterBottom>
-          Inventory Statistics
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
-            <Typography variant="body1" gutterBottom>
-              Total Items: {getTotalItems()}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              Total Stock Level: {getTotalStockLevel()}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              Total Inventory Price: ₱{getTotalPrice()}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              Total Equipment Items: {getTotalItemsByType("equipment")}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              Total Supplement Items: {getTotalItemsByType("supplement")}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              Total Equipment Price: ₱{getTotalPriceByType("equipment")}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              Total Supplement Price: ₱{getTotalPriceByType("supplement")}
-            </Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Typography variant="body1" gutterBottom>
-              Item with Minimum Inventory: {getMinInventoryItem().name} (
-              {getMinInventoryItem().quantity})
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              Item with Maximum Inventory: {getMaxInventoryItem().name} (
-              {getMaxInventoryItem().quantity})
-            </Typography>
-          </Grid>
-        </Grid>
-        <Box mt={3} display="flex" justifyContent="flex-end">
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleDownloadClick}
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Paper
+            elevation={3}
+            sx={{ padding: 3, backgroundColor: colors.primary[400] }}
           >
-            Download CSV Report
-          </Button>
-        </Box>
-      </Paper>
-
-      {/* Confirmation Dialog */}
+            <Typography variant="h6" gutterBottom>
+              Inventory Overview
+            </Typography>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+            >
+              <Typography variant="body1">Total Items:</Typography>
+              <Typography variant="body1">{getTotalItems()}</Typography>
+            </Box>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+            >
+              <Typography variant="body1">Total Stock Level:</Typography>
+              <Typography variant="body1">{getTotalStockLevel()}</Typography>
+            </Box>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+            >
+              <Typography variant="body1">Total Inventory Price:</Typography>
+              <Typography variant="body1">₱{getTotalPrice()}</Typography>
+            </Box>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Paper
+            elevation={3}
+            sx={{ padding: 3, backgroundColor: colors.primary[400] }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Item Type Statistics
+            </Typography>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+            >
+              <Typography variant="body1">Total Equipment Items:</Typography>
+              <Typography variant="body1">
+                {getTotalItemsByType("equipment")}
+              </Typography>
+            </Box>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+            >
+              <Typography variant="body1">Total Supplement Items:</Typography>
+              <Typography variant="body1">
+                {getTotalItemsByType("supplement")}
+              </Typography>
+            </Box>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+            >
+              <Typography variant="body1">Total Equipment Price:</Typography>
+              <Typography variant="body1">
+                ₱{getTotalPriceByType("equipment")}
+              </Typography>
+            </Box>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+            >
+              <Typography variant="body1">Total Supplement Price:</Typography>
+              <Typography variant="body1">
+                ₱{getTotalPriceByType("supplement")}
+              </Typography>
+            </Box>
+          </Paper>
+        </Grid>
+        <Grid item xs={12}>
+          <Paper
+            elevation={3}
+            sx={{ padding: 3, backgroundColor: colors.primary[400] }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Inventory Extremes
+            </Typography>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+            >
+              <Typography variant="body1">
+                Item with Minimum Inventory:
+              </Typography>
+              <Typography variant="body1">
+                {getMinInventoryItem().name} ({getMinInventoryItem().quantity})
+              </Typography>
+            </Box>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+            >
+              <Typography variant="body1">
+                Item with Maximum Inventory:
+              </Typography>
+              <Typography variant="body1">
+                {getMaxInventoryItem().name} ({getMaxInventoryItem().quantity})
+              </Typography>
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
+      <Box mt={3} display="flex" justifyContent="flex-end">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleDownloadClick}
+        >
+          Download CSV Report
+        </Button>
+      </Box>
       <Dialog open={isDialogOpen} onClose={() => setDialogOpen(false)}>
         <DialogTitle>Confirm CSV Download</DialogTitle>
         <DialogContent>

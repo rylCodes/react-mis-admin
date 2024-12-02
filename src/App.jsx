@@ -20,7 +20,7 @@ import SalaryInclusionForm from "./scenes/payroll/SalaryInclusionForm.jsx";
 import Daily from "./scenes/customer/daily.jsx";
 import Monthly from "./scenes/customer/monthly.jsx";
 import InventoryForm from "./scenes/inventory/inventoryForm.jsx";
-import EquipmentTable from "./scenes/inventory/equipmentTabe.jsx";
+import EquipmentTable from "./scenes/inventory/equipmentTable.jsx";
 import InventoryTable from "./scenes/inventory/inventoryTable.jsx";
 import Report from "./scenes/inventory/report.jsx";
 import CustomerArchive from "./scenes/customer/customerArchive.jsx";

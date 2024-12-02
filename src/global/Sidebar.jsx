@@ -10,6 +10,7 @@ import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import InventoryIcon from "@mui/icons-material/Inventory";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -224,7 +225,7 @@ const Sidebar = () => {
             <Item
               title="Inventory"
               to="/"
-              icon={<BadgeOutlinedIcon />}
+              icon={<InventoryIcon />}
               selected={selected === "/"}
               setSelected={() => {
                 handleSelect("/");
@@ -244,9 +245,9 @@ const Sidebar = () => {
                 <Item
                   title="Equipment Table"
                   to="/equipmenttable"
-                  selected={selected === "/equipmenttable"}
+                  selected={selected === "/equipmentTable"}
                   setSelected={() =>
-                    handleSelect("Equipment Table", "/equipmenttable")
+                    handleSelect("Equipment Table", "/equipmentTable")
                   }
                 />
                 <Item

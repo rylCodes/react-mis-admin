@@ -27,7 +27,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAlert } from "../../context/AlertContext";
 
-const InventoryTable = () => {
+const EquipmentTable = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -36,14 +36,14 @@ const InventoryTable = () => {
   const navigate = useNavigate();
 
   const handleUpdateSuccess = () => {
-    showAlert(`Inventory successfully updated.`, "success");
+    showAlert(`Equipment successfully updated.`, "success");
   };
 
   const handleError = () => {
-    showAlert("An error occurred while updating the inventory!", "error");
+    showAlert("An error occurred while updating the equipment!", "error");
   };
 
-  const [inventoryData, setInventoryData] = useState([]);
+  const [equipmentData, setEquipmentData] = useState([]);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
 
@@ -51,7 +51,7 @@ const InventoryTable = () => {
     if (!authToken) {
       navigate("/");
     } else {
-      const fetchInventoryData = async () => {
+      const fetchEquipmentData = async () => {
         try {
           const response = await axios.get(
             "http://localhost:8000/api/admin/show-inventory",
@@ -61,17 +61,18 @@ const InventoryTable = () => {
               },
             }
           );
-          const inventories = response.data.data.filter(
-            (item) => item.type === "supplement"
+
+          const equipments = response.data.data.filter(
+            (item) => item.type === "equipment"
           );
-          setInventoryData(inventories);
-          console.log(inventories);
+          setEquipmentData(equipments);
+          console.log(equipments);
         } catch (error) {
-          console.error("Error fetching inventory data:", error);
+          console.error("Error fetching equipment data:", error);
         }
       };
 
-      fetchInventoryData();
+      fetchEquipmentData();
     }
   }, [authToken, navigate]);
 
@@ -99,16 +100,16 @@ const InventoryTable = () => {
           },
         }
       );
-      console.log("Inventory updated successfully:", response.data);
+      console.log("Equipment updated successfully:", response.data);
       setEditModalOpen(false);
-      // Refresh the inventory data
-      const updatedInventoryData = inventoryData.map((item) =>
+      // Refresh the equipment data
+      const updatedEquipmentData = equipmentData.map((item) =>
         item.id === currentItem.id ? response.data.data : item
       );
-      setInventoryData(updatedInventoryData);
+      setEquipmentData(updatedEquipmentData);
       handleUpdateSuccess();
     } catch (error) {
-      console.error("Error updating inventory:", error);
+      console.error("Error updating equipment:", error);
       handleError();
     }
   };
@@ -121,7 +122,7 @@ const InventoryTable = () => {
 
   return (
     <Box sx={{ padding: 3 }}>
-      <Header title="Inventory" subtitle="Manage and Track Inventory Levels" />
+      <Header title="Equipment" subtitle="Manage and Track Inventory Levels" />
       <TableContainer
         component={Paper}
         sx={{ backgroundColor: colors.primary[400] }}
@@ -150,13 +151,13 @@ const InventoryTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {inventoryData?.map((inventory) => (
-              <TableRow key={inventory.id}>
-                <TableCell>{inventory.name}</TableCell>
+            {equipmentData.map((equipment) => (
+              <TableRow key={equipment.id}>
+                <TableCell>{equipment.name}</TableCell>
                 <TableCell>
                   <img
-                    src={inventory.picture || "https://via.placeholder.com/100"}
-                    alt={inventory.name}
+                    src={equipment.picture || "https://via.placeholder.com/100"}
+                    alt={equipment.name}
                     style={{
                       width: "100px",
                       height: "auto",
@@ -167,27 +168,27 @@ const InventoryTable = () => {
                 </TableCell>
                 <TableCell
                   sx={{
-                    color: getStockLevelColor(inventory.quantity),
+                    color: getStockLevelColor(equipment.quantity),
                     fontWeight: "bold",
                   }}
                 >
-                  {inventory.quantity}
+                  {equipment.quantity}
                 </TableCell>
                 <TableCell>
-                  {inventory.short_description || (
+                  {equipment.short_description || (
                     <i style={{ color: colors.grey[500] }}>
                       No description available
                     </i>
                   )}
                 </TableCell>
-                <TableCell>{inventory.price}</TableCell>
+                <TableCell>{equipment.price}</TableCell>
                 <TableCell>
                   <Tooltip title="Edit this equipment" arrow>
                     <Button
                       variant="contained"
                       color="secondary"
                       startIcon={<EditOutlinedIcon />}
-                      onClick={() => handleEdit(inventory)}
+                      onClick={() => handleEdit(equipment)}
                       sx={{ marginRight: 1 }}
                     >
                       Edit
@@ -203,8 +204,8 @@ const InventoryTable = () => {
       <Modal
         open={editModalOpen}
         onClose={() => setEditModalOpen(false)}
-        aria-labelledby="edit-inventory-modal"
-        aria-describedby="edit-inventory-modal-description"
+        aria-labelledby="edit-equipment-modal"
+        aria-describedby="edit-equipment-modal-description"
       >
         <Box
           sx={{
@@ -219,7 +220,7 @@ const InventoryTable = () => {
           }}
         >
           <Typography variant="h6" component="h2">
-            Edit Inventory
+            Edit Equipment
           </Typography>
           {currentItem && (
             <Box component="form" sx={{ mt: 2 }}>
@@ -300,4 +301,4 @@ const InventoryTable = () => {
   );
 };
 
-export default InventoryTable;
+export default EquipmentTable;
