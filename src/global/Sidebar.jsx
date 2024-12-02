@@ -8,6 +8,8 @@ import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -204,9 +206,18 @@ const Sidebar = () => {
             <Item
               title="Payroll"
               to="/payroll-list"
-              icon={<HomeOutlinedIcon />}
+              icon={<AccountBalanceWalletIcon />}
               selected={selected}
               setSelected={() => handleSelect("Payroll List", "/payroll-list")}
+            />
+
+            {/* Products */}
+            <Item
+              title="Products"
+              to="/products"
+              icon={<ShoppingCartIcon />}
+              selected={selected}
+              setSelected={() => handleSelect("Products", "/products")}
             />
 
             {/*Inventory */}

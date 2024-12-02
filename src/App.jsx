@@ -38,8 +38,8 @@ import AddPayrollForm from "./scenes/payroll/addPayrollForm.jsx";
 import PaymentForm from "./components/paymentForm.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { AlertProvider } from "./context/AlertContext.jsx";
-import Positions from "./scenes/employees/EmployeePosition.jsx";
 import EmployeePosition from "./scenes/employees/EmployeePosition.jsx";
+import Products from "./scenes/products";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -117,6 +117,7 @@ function ContentLayout({ isSidebar, setIsSidebar }) {
           <Route path="/systemvariable" element={<SystemVariable />} />
           <Route path="/payment-receipt" element={<PaymentReceipt />} />
           <Route path="/payment-form" element={<PaymentForm />} />
+          <Route path="/products" element={<Products />} />
         </Routes>
       </main>
     </>
