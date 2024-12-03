@@ -117,7 +117,7 @@ function ContentLayout({ isSidebar, setIsSidebar }) {
           <Route path="/systemvariable" element={<SystemVariable />} />
           <Route path="/payment-receipt" element={<PaymentReceipt />} />
           <Route path="/payment-form" element={<PaymentForm />} />
-          <Route path="/products" element={<Products />} />
+          {/* <Route path="/products" element={<Products />} /> */}
         </Routes>
       </main>
     </>

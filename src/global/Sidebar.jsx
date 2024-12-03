@@ -213,13 +213,13 @@ const Sidebar = () => {
             />
 
             {/* Products */}
-            <Item
+            {/* <Item
               title="Products"
               to="/products"
               icon={<ShoppingCartIcon />}
               selected={selected}
               setSelected={() => handleSelect("Products", "/products")}
-            />
+            /> */}
 
             {/*Inventory */}
             <Item
