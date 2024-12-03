@@ -11,6 +11,7 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import InventoryIcon from "@mui/icons-material/Inventory";
+import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -221,6 +222,17 @@ const Sidebar = () => {
               setSelected={() => handleSelect("Products", "/products")}
             /> */}
 
+            {/* Services Offered */}
+            <Item
+              title="Services Offered"
+              to="/services-offered"
+              icon={<FitnessCenterIcon />}
+              selected={selected}
+              setSelected={() =>
+                handleSelect("Services Offered", "/services-offered")
+              }
+            />
+
             {/*Inventory */}
             <Item
               title="Inventory"
@@ -331,14 +343,6 @@ const Sidebar = () => {
                   selected={selected === "/backandrestore"}
                   setSelected={() =>
                     handleSelect("Back up and Restore", "/backandrestore")
-                  }
-                />
-                <Item
-                  title="System Vaviable "
-                  to="/systemvariable"
-                  selected={selected === "/systemvariable"}
-                  setSelected={() =>
-                    handleSelect("System Varibale", "/systemvariable")
                   }
                 />
               </div>

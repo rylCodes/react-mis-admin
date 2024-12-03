@@ -34,7 +34,7 @@ const sections = [
   { id: "edit-package-10", label: "BOXING   " },
 ];
 
-const SystemVariable = () => {
+const servicesOffered = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -80,6 +80,7 @@ const SystemVariable = () => {
 
       if (response.status === 200) {
         setExercises(response.data.data);
+        console.log(response.data.data);
       } else {
         console.error("Failed to fetch exercises:", response);
       }
@@ -155,7 +156,7 @@ const SystemVariable = () => {
   return (
     <Box sx={{ padding: 3 }}>
       <Header
-        title="System Variable"
+        title="Services Offered"
         subtitle="Manage Discounts and Packages"
       />
 
@@ -279,4 +280,4 @@ const SystemVariable = () => {
   );
 };
 
-export default SystemVariable;
+export default servicesOffered;

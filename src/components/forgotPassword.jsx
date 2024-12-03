@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   useTheme,
   Container,
@@ -8,69 +8,70 @@ import {
   Box,
 } from "@mui/material";
 import { tokens } from "../theme";
-import { useNavigate } from "react-router-dom"; // For navigation
-import axios from "axios"; // For making API requests
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { AuthContext } from "../context/AuthContext";
 
 const ForgotPassword = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const navigate = useNavigate(); // Initialize navigation
+  const { logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const [secretKeywords, setSecretKeywords] = useState({
+  const [formValues, setFormValues] = useState({
+    email: "",
     keyword1: "",
     keyword2: "",
     keyword3: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
-  const [error, setError] = useState({
-    keyword1: false,
-    keyword2: false,
-    keyword3: false,
-  });
+  const [error, setError] = useState({});
+  const [loading, setLoading] = useState(false);
 
-  const [loading, setLoading] = useState(false); // To handle loading state
-
-  // Handle the keyword input changes
-  const handleKeywordChange = (event, keywordKey) => {
-    setSecretKeywords((prev) => ({
+  const handleInputChange = (event, field) => {
+    setFormValues((prev) => ({
       ...prev,
-      [keywordKey]: event.target.value,
+      [field]: event.target.value,
     }));
   };
 
-  // Handle form submission
   const handleConfirm = async () => {
-    // Validate input fields
+    // Validate form fields
     const newError = {
-      keyword1: !secretKeywords.keyword1,
-      keyword2: !secretKeywords.keyword2,
-      keyword3: !secretKeywords.keyword3,
+      email: !formValues.email,
+      keyword1: !formValues.keyword1,
+      keyword2: !formValues.keyword2,
+      keyword3: !formValues.keyword3,
+      newPassword: !formValues.newPassword,
+      confirmPassword:
+        !formValues.confirmPassword ||
+        formValues.newPassword !== formValues.confirmPassword,
     };
 
     setError(newError);
 
-    // If no errors, proceed to send data
+    // Proceed only if no errors
     if (!Object.values(newError).some((value) => value)) {
       setLoading(true);
       try {
         const response = await axios.post(
-          "https://your-api-url.com/api/admin/add-security-answer", // Update with your actual API endpoint
+          "http://localhost:8000/api/reset-password/answers",
           {
-            secret_keyword_1: secretKeywords.keyword1,
-            secret_keyword_2: secretKeywords.keyword2,
-            secret_keyword_3: secretKeywords.keyword3,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`, // Token if needed
-            },
+            email: formValues.email,
+            answer_1: formValues.keyword1,
+            answer_2: formValues.keyword2,
+            answer_3: formValues.keyword3,
+            new_password: formValues.newPassword,
+            confirm_password: formValues.confirmPassword,
           }
         );
-        alert(response.data.message); // Show success message
-        navigate("/change-password"); // Navigate to password reset page
+        logout();
+        alert(response.data.Message);
+        navigate("/");
       } catch (error) {
-        // Handle API error
-        console.error("Error submitting secret keywords:", error);
+        console.error("Error resetting password:", error);
         alert(
           error.response?.data?.error || "An error occurred. Please try again."
         );
@@ -80,18 +81,16 @@ const ForgotPassword = () => {
     }
   };
 
-  // Reset form
   const handleCancel = () => {
-    setSecretKeywords({
+    setFormValues({
+      email: "",
       keyword1: "",
       keyword2: "",
       keyword3: "",
+      newPassword: "",
+      confirmPassword: "",
     });
-    setError({
-      keyword1: false,
-      keyword2: false,
-      keyword3: false,
-    });
+    setError({});
   };
 
   return (
@@ -107,24 +106,59 @@ const ForgotPassword = () => {
     >
       <Box sx={{ textAlign: "center", marginBottom: 4 }}>
         <h2>Forgot Password</h2>
-        <p>Enter your secret keywords to proceed.</p>
+        <p>Enter your details to reset your password.</p>
       </Box>
 
       <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Email"
+            value={formValues.email}
+            onChange={(e) => handleInputChange(e, "email")}
+            error={!!error.email}
+            helperText={error.email ? "Email is required" : ""}
+          />
+        </Grid>
         {["keyword1", "keyword2", "keyword3"].map((keywordKey, index) => (
           <Grid item xs={12} key={keywordKey}>
             <TextField
               fullWidth
-              margin="normal"
               label={`Secret Keyword ${index + 1}`}
-              type="password" // Using password type for security
-              value={secretKeywords[keywordKey]}
-              onChange={(e) => handleKeywordChange(e, keywordKey)}
-              error={error[keywordKey]}
+              type="password"
+              value={formValues[keywordKey]}
+              onChange={(e) => handleInputChange(e, keywordKey)}
+              error={!!error[keywordKey]}
               helperText={error[keywordKey] ? "Secret keyword is required" : ""}
             />
           </Grid>
         ))}
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="New Password"
+            type="password"
+            value={formValues.newPassword}
+            onChange={(e) => handleInputChange(e, "newPassword")}
+            error={!!error.newPassword}
+            helperText={error.newPassword ? "New password is required" : ""}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Confirm Password"
+            type="password"
+            value={formValues.confirmPassword}
+            onChange={(e) => handleInputChange(e, "confirmPassword")}
+            error={!!error.confirmPassword}
+            helperText={
+              error.confirmPassword
+                ? "Passwords must match and cannot be empty"
+                : ""
+            }
+          />
+        </Grid>
       </Grid>
 
       <Grid container spacing={2} sx={{ marginTop: 3 }}>

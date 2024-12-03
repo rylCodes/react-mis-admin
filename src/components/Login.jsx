@@ -78,7 +78,7 @@ const Login = () => {
 
   const paperStyle = {
     padding: 20,
-    height: "60vh",
+    height: "28rem",
     width: 380,
     margin: "150px auto",
   };
@@ -103,7 +103,7 @@ const Login = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <div style={{ position: "relative" }}>
+          <div style={{ position: "relative", marginBottom: "2rem" }}>
             <TextField
               label="Password"
               placeholder="Enter password"
@@ -137,19 +137,21 @@ const Login = () => {
             }
             label="Remember me"
           />
-          <Typography>
-            <Link href="/forgot-password">Forgot password?</Link>
-          </Typography>
-          {error && <Typography color="error">{error}</Typography>}
-          <Button
-            type="submit"
-            color="primary"
-            variant="contained"
-            style={btnStyle}
-            fullWidth
-          >
-            Sign In
-          </Button>
+          <div style={{ marginTop: "1rem" }}>
+            <Typography>
+              <Link href="/forgot-password">Forgot password?</Link>
+            </Typography>
+            {error && <Typography color="error">{error}</Typography>}
+            <Button
+              type="submit"
+              color="primary"
+              variant="contained"
+              style={btnStyle}
+              fullWidth
+            >
+              Sign In
+            </Button>
+          </div>
         </form>
         {/* Link to Sign Up Page */}
         {/* <Typography>
