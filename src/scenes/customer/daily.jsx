@@ -24,6 +24,7 @@ import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
 import { useAlert } from "../../context/AlertContext";
 import DeleteIcon from "@mui/icons-material/Delete";
+import transitions from "@material-ui/core/styles/transitions";
 
 const Daily = () => {
   const theme = useTheme();
@@ -45,7 +46,7 @@ const Daily = () => {
   };
 
   useEffect(() => {
-    fetchClients();
+    fetchClientTransactions();
   }, []);
 
   useEffect(() => {
@@ -54,44 +55,18 @@ const Daily = () => {
     }
   }, [authToken, navigate]);
 
-  const [AddCustomerOpen, setAddCustomerOpen] = useState(false);
-  const [updateCustomerOpen, setUpdateCustomerOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [customer, setCustomer] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
-
-  const handleOpen = () => setAddCustomerOpen(true);
-  const handleClose = () => setAddCustomerOpen(false);
-
-  const handleAddCustomer = (newcustomer) => {
-    fetchClients();
-  };
-
-  const handleUpdateOpen = (customer) => {
-    const [firstname, ...lastname] = customer.name.split(" ");
-    setSelectedCustomer({
-      ...customer,
-      firstname,
-      lastname: lastname.join(" "),
-    });
-    setUpdateCustomerOpen(true);
-  };
-
-  const handleUpdateClose = () => {
-    setSelectedCustomer(null);
-    setUpdateCustomerOpen(false);
-  };
 
   const handleArchive = async (id) => {
     try {
       const userConfirmed = confirm(
-        "Do you want to move this customer to archive?"
+        "Do you want to move this customer transaction to archive?"
       );
       if (!userConfirmed) return;
 
       const response = await axios.post(
-        `http://localhost:8000/api/admin/soft-delete-client/${id}`,
+        `http://localhost:8000/api/admin/exercise-transaction/delete/${id}`,
         null, // No payload needed
         {
           headers: {
@@ -102,7 +77,7 @@ const Daily = () => {
 
       if (response.status === 200) {
         handleArchiveSuccess();
-        fetchClients();
+        fetchClientTransactions();
       } else {
         handleError();
       }
@@ -112,33 +87,55 @@ const Daily = () => {
     }
   };
 
-  const fetchClients = async () => {
+  const getUniqueInstructors = (transactions) => {
+    return transactions
+      .reduce((acc, item) => {
+        if (item.instructor_name && !acc.includes(item.instructor_name)) {
+          acc.push(item.instructor_name);
+        }
+        return acc;
+      }, [])
+      .join(", ");
+  };
+
+  const fetchClientTransactions = async () => {
     setIsFetching(true);
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/staff/exercise-transaction/show",
+        "http://localhost:8000/api/admin/exercise-transaction/show",
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
           },
         }
       );
-      console.log(response.data.data);
-      return;
+      console.log(response.data);
       if (response.status === 200) {
-        const clients = response.data.data.map((client) => ({
-          id: client.id,
-          name: client.fullname,
-          sex: client.gender,
-          email: client.email,
-          contact: client.contact_no,
-          address: client.address,
-          chosenservices: client.chosen_services,
-          instructor: client.instructor,
-          plan: client.plan,
-          amount: client.amount,
-          isActive: client.is_active,
-        }));
+        const clients = response.data.data
+          .filter((client) =>
+            client.transactions.some((item) => item.tag === "session")
+          )
+          .map((client) => ({
+            id: client.transaction_code,
+            name: client.client_name,
+            sex: client.gender,
+            email: client.email,
+            contact: client.contact_no,
+            address: client.address,
+            chosenservices: client.transactions
+              .filter((item) => item.tag === "session")
+              .map((item) => item.exercise_name)
+              .join(", "),
+            instructor: getUniqueInstructors(
+              client.transactions.filter((item) => item.tag === "session")
+            ),
+            plan: "session",
+            totalPrice: client.transactions
+              .filter((item) => item.tag === "session")
+              .reduce((total, item) => total + parseFloat(item.price), 0)
+              .toFixed(2),
+          }));
+
         setCustomer(clients);
         setIsFetching(false);
       } else {
@@ -151,73 +148,6 @@ const Daily = () => {
     }
   };
 
-  // Update customer in the API
-  const handleUpdateCustomer = async () => {
-    try {
-      setIsLoading(true);
-      const response = await axios.post(
-        `http://localhost:8000/api/admin/update-client/${selectedCustomer.id}`,
-        {
-          firstname: selectedCustomer.firstname,
-          lastname: selectedCustomer.lastname,
-          email: selectedCustomer.email,
-          password: selectedCustomer.password, // Optional: Only if changing password
-          address: selectedCustomer.address,
-          gender: selectedCustomer.sex,
-          contact_no: selectedCustomer.contact,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        }
-      );
-      if (response.status === 200) {
-        // Update local state after successful API update
-        const updatedCustomer = {
-          ...selectedCustomer,
-          fullname:
-            selectedCustomer.firstname + " " + selectedCustomer.lastname,
-          password: "", // empty password
-        };
-
-        setCustomer((prevCustomer) =>
-          prevCustomer.map((c) =>
-            c.id === selectedCustomer.id ? updatedCustomer : c
-          )
-        );
-        handleUpdateClose();
-        setIsLoading(false);
-        handleUpdateSuccess();
-      } else {
-        setIsLoading(false);
-        handleError();
-      }
-    } catch (error) {
-      console.error("Error updating customer:", error);
-      setIsLoading(false);
-      handleError();
-    }
-  };
-
-  const serviceOptions = [
-    "Gym Per session",
-    "Gym Monthly",
-    "Monthly Treadmill",
-    "Gym + Treadmill",
-    "P.I Per Session",
-    "P.I Monthly",
-    "Zumba",
-    "Dance",
-    "Muay Thai",
-    "Taekwondo",
-    "Boxing",
-  ];
-
-  const handleSubmit = () => {
-    navigate("/payment-form", { state: { customer: selectedCustomer } });
-  };
-
   const columns = [
     { field: "id", headerName: "ID" },
     { field: "name", headerName: "Name", flex: 1 },
@@ -228,13 +158,19 @@ const Daily = () => {
     { field: "chosenservices", headerName: "Chosen Services", flex: 1 },
     { field: "instructor", headerName: "Instructor", flex: 1 },
     { field: "plan", headerName: "Plan", flex: 1 },
-    { field: "amount", headerName: "Amount", flex: 1 },
+    { field: "totalPrice", headerName: "Total Amount", flex: 1 },
     {
       field: "action",
       headerName: "Action",
       flex: 1,
       renderCell: (params) => (
-        <Box display="flex" gap="9px" justifyContent="center">
+        <Box
+          display="flex"
+          alignItems={"center"}
+          height={"100%"}
+          gap="9px"
+          justifyContent="center"
+        >
           <Button
             variant="outlined"
             color="error"
@@ -274,128 +210,12 @@ const Daily = () => {
           },
         }}
       >
-        <Box display="flex" justifyContent="flex-end" mb="10px">
-          <Button variant="contained" color="primary" onClick={handleOpen}>
-            Add Customer
-          </Button>
-        </Box>
-
         <DataGrid
           loading={isFetching}
           checkboxSelection
           rows={customer}
           columns={columns}
         />
-
-        <Dialog
-          open={AddCustomerOpen}
-          onClose={handleClose}
-          fullWidth
-          maxWidth="sm"
-        >
-          <DialogContent>
-            <AddCustomer
-              closeModal={handleClose}
-              onAddCustomer={handleAddCustomer}
-            />
-          </DialogContent>
-        </Dialog>
-        <Dialog
-          open={updateCustomerOpen}
-          onClose={handleUpdateClose}
-          fullWidth
-          maxWidth="sm"
-        >
-          <DialogTitle>Update Customer</DialogTitle>
-          <DialogContent>
-            {selectedCustomer && (
-              <Box component="form" mt={2}>
-                <TextField
-                  fullWidth
-                  label="First Name"
-                  margin="normal"
-                  value={selectedCustomer.firstname}
-                  onChange={(e) =>
-                    setSelectedCustomer({
-                      ...selectedCustomer,
-                      firstname: e.target.value,
-                    })
-                  }
-                />
-                <TextField
-                  fullWidth
-                  label="Last Name"
-                  margin="normal"
-                  value={selectedCustomer.lastname}
-                  onChange={(e) =>
-                    setSelectedCustomer({
-                      ...selectedCustomer,
-                      lastname: e.target.value,
-                    })
-                  }
-                />
-                <TextField
-                  fullWidth
-                  label="Email"
-                  margin="normal"
-                  value={selectedCustomer.email}
-                  onChange={(e) =>
-                    setSelectedCustomer({
-                      ...selectedCustomer,
-                      email: e.target.value,
-                    })
-                  }
-                />
-                <TextField
-                  fullWidth
-                  label="Password"
-                  margin="normal"
-                  value={selectedCustomer.password}
-                  type="password"
-                  onChange={(e) =>
-                    setSelectedCustomer({
-                      ...selectedCustomer,
-                      password: e.target.value,
-                    })
-                  }
-                />
-                <TextField
-                  fullWidth
-                  label="Address"
-                  margin="normal"
-                  value={selectedCustomer.address}
-                  onChange={(e) =>
-                    setSelectedCustomer({
-                      ...selectedCustomer,
-                      address: e.target.value,
-                    })
-                  }
-                />
-                <TextField
-                  fullWidth
-                  label="Contact No"
-                  margin="normal"
-                  value={selectedCustomer.contact}
-                  onChange={(e) =>
-                    setSelectedCustomer({
-                      ...selectedCustomer,
-                      contact: e.target.value,
-                    })
-                  }
-                />
-
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleUpdateCustomer}
-                  disabled={isLoading}
-                >
-                  Save
-                </Button>
-              </Box>
-            )}
-          </DialogContent>
-        </Dialog>
       </Box>
     </Box>
   );

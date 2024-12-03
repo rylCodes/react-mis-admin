@@ -10,7 +10,8 @@ import BarChart from "../../components/BarChart";
 import StatBox from "../../components/StatBox";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
+import axios from "axios";
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -19,13 +20,109 @@ const Dashboard = () => {
   const { authToken } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const [isFetching, setIsFetching] = useState(false);
+  const [transactions, setTransactions] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [totalSales, setTotalSales] = useState(null);
+  const [monthlySales, setMonthlySales] = useState(null);
+  const [dailySales, setDailySales] = useState(null);
+  const [exercises, setExercises] = useState([]);
+
+  const fetchClients = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/admin/show-client",
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      console.log(response.data.data);
+      if (response.status === 200) {
+        setCustomers(response.data.data);
+      } else {
+        console.error("Failed to fetch clients");
+      }
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+    }
+  };
+
+  const fetchExercises = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/admin/show-exercise",
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setExercises(response.data.data);
+        console.log(response.data.data);
+      } else {
+        console.error("Failed to fetch exercises:", response);
+      }
+    } catch (error) {
+      console.error("Error fetching exercises:", error.message);
+    }
+  };
+
+  const fetchTransactions = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/admin/exercise-transaction/show",
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        const clientTransactions = response.data.data;
+        const totalSalesAmount = clientTransactions.reduce(
+          (acc, client) => acc + parseFloat(client.total_price),
+          0
+        );
+        const monthly = clientTransactions.filter((client) =>
+          client.transactions.some((item) => item.tag === "monthly")
+        );
+        const daily = clientTransactions.filter((client) =>
+          client.transactions.some((item) => item.tag === "session")
+        );
+        setTotalSales(totalSalesAmount.toFixed(2));
+        setTransactions(clientTransactions);
+        setMonthlySales(monthly);
+        setDailySales(daily);
+      } else {
+        console.error("Failed to fetch transactions");
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      setIsFetching(false);
+    }
+  };
+
   useEffect(() => {
     if (!authToken) {
       navigate("/");
+    } else {
+      setIsFetching(true);
+      try {
+        fetchClients();
+        fetchTransactions();
+        fetchExercises();
+        setIsFetching(false);
+      } catch (error) {
+        setIsFetching(false);
+        console.error(error);
+      }
     }
+    console.log(exercises);
   }, [authToken, navigate]);
-
-  console.log(Header, HorizontalChart, BarChart, StatBox, PieChart);
 
   return (
     <Box m="20px">
@@ -51,7 +148,7 @@ const Dashboard = () => {
           justifyContent="center"
         >
           <StatBox
-            title="3"
+            title={`${monthlySales?.length} `}
             subtitle="Monthly"
             icon={
               <CalendarMonthOutlinedIcon
@@ -69,7 +166,7 @@ const Dashboard = () => {
           justifyContent="center"
         >
           <StatBox
-            title="6"
+            title={`${dailySales?.length} `}
             subtitle="Daily"
             icon={
               <PointOfSaleIcon
@@ -87,7 +184,7 @@ const Dashboard = () => {
           justifyContent="center"
         >
           <StatBox
-            title="9 "
+            title={`${customers?.length} `}
             subtitle="Guest"
             icon={
               <PersonAddIcon
@@ -123,7 +220,7 @@ const Dashboard = () => {
                 fontWeight="bold"
                 color={colors.greenAccent[500]}
               >
-                29,342
+                ₱ {totalSales}
               </Typography>
             </Box>
           </Box>
