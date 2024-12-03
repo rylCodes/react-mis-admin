@@ -9,9 +9,10 @@ import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+// import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
+import AccountBoxIcon from "@mui/icons-material/AccountBox";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -277,6 +278,16 @@ const Sidebar = () => {
                 />
               </div>
             )}
+
+            {/* Profile */}
+            <Item
+              title="Profile"
+              to="/profile"
+              icon={<AccountBoxIcon />}
+              selected={selected === "/profile"}
+              setSelected={() => handleSelect("Profile", "/profile")}
+            />
+
             {/*Settings */}
             <Item
               title="Settings"

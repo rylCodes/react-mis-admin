@@ -39,6 +39,7 @@ import PaymentForm from "./components/paymentForm.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { AlertProvider } from "./context/AlertContext.jsx";
 import EmployeePosition from "./scenes/employees/EmployeePosition.jsx";
+import Profile from "./components/Profile.jsx";
 // import Products from "./scenes/products";
 
 function App() {
@@ -118,6 +119,7 @@ function ContentLayout({ isSidebar, setIsSidebar }) {
           <Route path="/payment-receipt" element={<PaymentReceipt />} />
           <Route path="/payment-form" element={<PaymentForm />} />
           {/* <Route path="/products" element={<Products />} /> */}
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </main>
     </>
