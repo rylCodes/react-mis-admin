@@ -222,15 +222,13 @@ const Sidebar = () => {
               setSelected={() => handleSelect("Products", "/products")}
             /> */}
 
-            {/* Services Offered */}
+            {/* Services */}
             <Item
-              title="Services Offered"
-              to="/services-offered"
+              title="Services"
+              to="/services"
               icon={<FitnessCenterIcon />}
               selected={selected}
-              setSelected={() =>
-                handleSelect("Services Offered", "/services-offered")
-              }
+              setSelected={() => handleSelect("Services", "/services")}
             />
 
             {/*Inventory */}

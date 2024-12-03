@@ -27,7 +27,7 @@ import CustomerArchive from "./scenes/customer/customerArchive.jsx";
 import AccountSettings from "./scenes/settings/accountSettings.jsx";
 import BackupAndRestore from "./scenes/settings/backupAndRestore.jsx";
 import AuditTrail from "./scenes/settings/auditTrail.jsx";
-import ServicesOffered from "./scenes/servicesOffered/index.jsx";
+import Services from "./scenes/services/index.jsx";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme.js";
 import Payslip from "./scenes/payroll/payslip.jsx";
@@ -114,7 +114,7 @@ function ContentLayout({ isSidebar, setIsSidebar }) {
           <Route path="/audittrail" element={<AuditTrail />} />
           <Route path="/accountsettings" element={<AccountSettings />} />
           <Route path="/backandrestore" element={<BackupAndRestore />} />
-          <Route path="/services-offered" element={<ServicesOffered />} />
+          <Route path="/services" element={<Services />} />
           <Route path="/payment-receipt" element={<PaymentReceipt />} />
           <Route path="/payment-form" element={<PaymentForm />} />
           {/* <Route path="/products" element={<Products />} /> */}

@@ -105,6 +105,7 @@ const servicesOffered = () => {
       setExerciseId(null);
       setPrice("");
       setPlan("");
+      setName("");
       setDescription("");
     }
     setImage(null);
@@ -122,8 +123,8 @@ const servicesOffered = () => {
     const payload = {
       name,
       price,
-      plan,
-      description,
+      tag: plan,
+      short_description: description,
     };
 
     try {
@@ -166,11 +167,22 @@ const servicesOffered = () => {
           Select a Section to Edit
         </Typography>
         <Grid container spacing={2}>
+          <Grid item>
+            {" "}
+            <Button
+              variant="contained"
+              color={exerciseId ? "inherit" : "secondary"}
+              onClick={() => handleSectionSelect(null)}
+            >
+              Create New
+            </Button>
+          </Grid>
+
           {exercises.map((section) => (
             <Grid item key={section.id}>
               <Button
                 variant="contained"
-                color={selectedSection === section.id ? "secondary" : "primary"}
+                color={selectedSection === section.id ? "info" : "primary"}
                 onClick={() => handleSectionSelect(section.id)}
               >
                 {section.label || section.name}
