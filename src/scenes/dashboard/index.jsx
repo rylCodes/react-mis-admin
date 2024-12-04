@@ -12,6 +12,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
+import DashboardSkeleton from "./DashboardSkeleton";
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -26,6 +27,7 @@ const Dashboard = () => {
   const [maleFemale, setMaleFemale] = useState([]);
 
   const fetchDashboardData = async () => {
+    setIsFetching(true);
     try {
       const response = await axios.get(
         "http://localhost:8000/api/admin/dashboard",
@@ -59,8 +61,10 @@ const Dashboard = () => {
         },
       ];
       setMaleFemale(maleFemaleData);
+      setIsFetching(false);
     } catch (error) {
       console.error("Error fetching inventory data:", error);
+      setIsFetching(false);
     }
   };
 
@@ -73,153 +77,169 @@ const Dashboard = () => {
   }, [authToken, navigate]);
 
   return (
-    <Box m="20px">
-      {/* HEADER */}
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Header title="Dashboard" subtitle="Welcome to your dashboard" />
-        <Box>{/* Your header-related content can go here */}</Box>
-      </Box>
-
-      {/* GRID & CHARTS */}
-      <Box
-        display="grid"
-        gridTemplateColumns="repeat(12, 1fr)"
-        gridAutoRows="140px"
-        gap="20px"
-      >
-        {/* ROW 1 */}
-        <Box
-          gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <StatBox
-            title={`${dashboardData.monthly_customer || ""} `}
-            subtitle="Monthly"
-            icon={
-              <CalendarMonthOutlinedIcon
-                sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-              />
-            }
-          />
-        </Box>
-
-        <Box
-          gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <StatBox
-            title={`${dashboardData.session_customer || ""} `}
-            subtitle="Daily"
-            icon={
-              <PointOfSaleIcon
-                sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-              />
-            }
-          />
-        </Box>
-
-        <Box
-          gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <StatBox
-            title={`${
-              dashboardData.session_customer + dashboardData.monthly_customer ||
-              ""
-            } `}
-            subtitle="Guest"
-            icon={
-              <PersonAddIcon
-                sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-              />
-            }
-          />
-        </Box>
-      </Box>
-
-      <Box
-        marginTop={"2rem"}
-        display="flex"
-        gap={2}
-        sx={{
-          maxWidth: "100rem",
-          maxHeight: "500px",
-          flexDirection: {
-            md: "column",
-            lg: "row",
-          },
-        }}
-      >
-        <Box
-          backgroundColor={colors.primary[400]}
-          sx={{
-            width: {
-              xs: "100%",
-              md: "100%",
-              lg: "60%",
-            },
-          }}
-        >
+    <>
+      {isFetching ? (
+        <DashboardSkeleton />
+      ) : (
+        <Box m="20px">
+          {/* HEADER */}
           <Box
-            mt="25px"
-            p="0 30px"
             display="flex"
             justifyContent="space-between"
             alignItems="center"
           >
-            <Box>
-              <Typography
-                variant="h5"
-                fontWeight="600"
-                color={colors.grey[100]}
-              >
-                Sales Services
-              </Typography>
-              <Typography
-                variant="h3"
-                fontWeight="bold"
-                color={colors.greenAccent[500]}
-              >
-                ₱ {dashboardData.total_sales}
-              </Typography>
+            <Header title="Dashboard" subtitle="Welcome to your dashboard" />
+          </Box>
+
+          {/* GRID & CHARTS */}
+          <Box
+            display="grid"
+            gridTemplateColumns="repeat(12, 1fr)"
+            gridAutoRows="140px"
+            gap="20px"
+          >
+            {/* ROW 1 */}
+            <Box
+              gridColumn="span 3"
+              backgroundColor={colors.primary[400]}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <StatBox
+                title={`${dashboardData.monthly_customer || ""} `}
+                subtitle="Monthly"
+                icon={
+                  <CalendarMonthOutlinedIcon
+                    sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
+                  />
+                }
+              />
+            </Box>
+
+            <Box
+              gridColumn="span 3"
+              backgroundColor={colors.primary[400]}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <StatBox
+                title={`${dashboardData.session_customer || ""} `}
+                subtitle="Daily"
+                icon={
+                  <PointOfSaleIcon
+                    sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
+                  />
+                }
+              />
+            </Box>
+
+            <Box
+              gridColumn="span 3"
+              backgroundColor={colors.primary[400]}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <StatBox
+                title={`${
+                  dashboardData.session_customer +
+                    dashboardData.monthly_customer || ""
+                } `}
+                subtitle="Guest"
+                icon={
+                  <PersonAddIcon
+                    sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
+                  />
+                }
+              />
             </Box>
           </Box>
 
-          <Box height="100%" width={"100%"} m="-20px 0 0 0">
-            <BarChart isDashboard={true} salesExerciseData={salesExercise} />
+          <Box
+            marginTop={"2rem"}
+            display="flex"
+            gap={2}
+            sx={{
+              maxWidth: "100rem",
+              maxHeight: "500px",
+              flexDirection: {
+                md: "column",
+                lg: "row",
+              },
+            }}
+          >
+            <Box
+              backgroundColor={colors.primary[400]}
+              sx={{
+                width: {
+                  xs: "100%",
+                  md: "100%",
+                  lg: "60%",
+                },
+              }}
+            >
+              <Box
+                mt="25px"
+                p="0 30px"
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Box>
+                  <Typography
+                    variant="h5"
+                    fontWeight="600"
+                    color={colors.grey[100]}
+                  >
+                    Sales Services
+                  </Typography>
+                  <Typography
+                    variant="h3"
+                    fontWeight="bold"
+                    color={colors.greenAccent[500]}
+                  >
+                    ₱ {dashboardData.total_sales}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box height="100%" width={"100%"} padding={"2rem"}>
+                <BarChart
+                  isDashboard={true}
+                  salesExerciseData={salesExercise}
+                />
+              </Box>
+            </Box>
+
+            {/* Pie Chart */}
+            <Box
+              backgroundColor={colors.primary[400]}
+              height="500px"
+              sx={{
+                width: {
+                  xs: "100%",
+                  md: "100%",
+                  lg: "40%",
+                },
+              }}
+              maxWidth={"40rem"}
+              p="2rem"
+            >
+              <Typography variant="h5" fontWeight="600">
+                Female and Male
+              </Typography>
+              <PieChart
+                height={"100%"}
+                isDashboard={true}
+                maleFemaleData={maleFemale}
+              />
+            </Box>
           </Box>
         </Box>
-
-        {/* Pie Chart */}
-        <Box
-          backgroundColor={colors.primary[400]}
-          height="500px"
-          sx={{
-            width: {
-              xs: "100%",
-              md: "100%",
-              lg: "40%",
-            },
-          }}
-          maxWidth={"40rem"}
-          p="30px"
-        >
-          <Typography variant="h5" fontWeight="600">
-            Female and Male
-          </Typography>
-          <PieChart height={"100%"} isDashboard={true} />
-        </Box>
-      </Box>
-    </Box>
+      )}
+    </>
   );
 };
 
