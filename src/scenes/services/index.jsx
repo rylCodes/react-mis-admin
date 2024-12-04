@@ -58,6 +58,7 @@ const servicesOffered = () => {
   const [description, setDescription] = useState("");
   const [exercises, setExercises] = useState([]);
   const [exerciseId, setExerciseId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!authToken) {
@@ -100,7 +101,7 @@ const servicesOffered = () => {
       setPrice(selectedExercise.price || "");
       setName(selectedExercise.name || "");
       setPlan(selectedExercise.plan || "session");
-      setDescription(selectedExercise.description || "");
+      setDescription(selectedExercise.short_description || "");
     } else {
       setExerciseId(null);
       setPrice("");
@@ -127,6 +128,7 @@ const servicesOffered = () => {
       short_description: description,
     };
 
+    setIsLoading(true);
     try {
       const response = await axios.post(endpoint, payload, {
         headers: {
@@ -135,15 +137,16 @@ const servicesOffered = () => {
       });
 
       if (response.status === 200 || response.status === 201) {
-        alert(`Exercise ${exerciseId ? "updated" : "created"} successfully!`);
         fetchExercises();
         handleUpdateSuccess();
+        setIsLoading(false);
       } else {
         console.error(
           `Failed to ${exerciseId ? "update" : "create"} exercise:`,
           response
         );
         handleError();
+        setIsLoading(false);
       }
     } catch (error) {
       console.error(
@@ -151,6 +154,7 @@ const servicesOffered = () => {
         error.message
       );
       handleError();
+      setIsLoading(false);
     }
   };
 
@@ -173,6 +177,7 @@ const servicesOffered = () => {
               variant="contained"
               color={exerciseId ? "inherit" : "secondary"}
               onClick={() => handleSectionSelect(null)}
+              disabled={isLoading}
             >
               Create New
             </Button>
@@ -184,6 +189,7 @@ const servicesOffered = () => {
                 variant="contained"
                 color={selectedSection === section.id ? "info" : "primary"}
                 onClick={() => handleSectionSelect(section.id)}
+                disabled={isLoading}
               >
                 {section.label || section.name}
               </Button>
@@ -283,7 +289,12 @@ const servicesOffered = () => {
           sx={{ marginTop: 3 }}
           justifyContent="flex-end"
         >
-          <Button variant="contained" color="primary" onClick={handleUpdate}>
+          <Button
+            disabled={isLoading}
+            variant="contained"
+            color="primary"
+            onClick={handleUpdate}
+          >
             {exerciseId ? "Update" : "Create"}
           </Button>
         </Grid>
