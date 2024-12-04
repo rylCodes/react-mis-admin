@@ -34,7 +34,7 @@ const AddEmployee = ({ closeModal, onAddEmployee, positions }) => {
     email: "",
     address: "",
     position_id: "",
-    password: "defaultPassword123", // Default password (you can generate this dynamically if needed)
+    password: "",
   });
 
   const handleChange = (e) => {
@@ -112,15 +112,6 @@ const AddEmployee = ({ closeModal, onAddEmployee, positions }) => {
         name="address"
         value={employeeData.address}
         onChange={handleChange}
-        required
-      />
-      <TextField
-        label="Joined"
-        name="joined"
-        type="date"
-        value={employeeData.joined}
-        onChange={handleChange}
-        InputLabelProps={{ shrink: true }}
         required
       />
 

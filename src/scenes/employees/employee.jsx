@@ -88,6 +88,7 @@ const Employee = () => {
         phone: staff.contact_no || "N/A",
         address: staff.address,
         position: staff.position,
+        joined_date: staff.joined_date,
       }));
       setEmployees(formattedData);
     } catch (error) {
@@ -288,7 +289,7 @@ const Employee = () => {
     { field: "email", headerName: "Email", flex: 1 },
     { field: "address", headerName: "Address", flex: 1 },
     { field: "position", headerName: "Position", flex: 1 },
-    { field: "joined", headerName: "Joined", flex: 1 },
+    { field: "joined_date", headerName: "Joined", flex: 1 },
     {
       field: "action",
       headerName: "Action",
