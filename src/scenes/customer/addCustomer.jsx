@@ -37,6 +37,7 @@ const AddCustomer = ({ closeModal, onAddCustomer }) => {
   });
 
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -46,6 +47,7 @@ const AddCustomer = ({ closeModal, onAddCustomer }) => {
 
   // Handle form submission
   const handleSubmit = async (e) => {
+    setIsLoading(true);
     e.preventDefault();
     try {
       const response = await axios.post(
@@ -60,11 +62,12 @@ const AddCustomer = ({ closeModal, onAddCustomer }) => {
       onAddCustomer(response.data.data); // Update parent state if needed
       closeModal();
       handleSuccess();
-      navigate("/payment-form", { state: { customer: response.data.data } });
+      setIsLoading(false);
     } catch (err) {
       console.log(err);
       setError("An error occurred while adding the client.");
       handleError();
+      setIsLoading(false);
     }
   };
 
@@ -134,7 +137,7 @@ const AddCustomer = ({ closeModal, onAddCustomer }) => {
         required
       />
       <Button type="submit" variant="contained" color="primary">
-        Add Client
+        {isLoading ? "Saving..." : "Save"}
       </Button>
     </Box>
   );
