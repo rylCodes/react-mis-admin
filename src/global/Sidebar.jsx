@@ -332,7 +332,7 @@ const Sidebar = () => {
                   </div>
                 )}
 
-                <Item
+                {/* <Item
                   title="Account Settings"
                   to="/accountsettings"
                   selected={selected === "/accountsettings"}
@@ -345,7 +345,7 @@ const Sidebar = () => {
                   to="/audittrail"
                   selected={selected === "/audittrail"}
                   setSelected={() => handleSelect("Audit Trail", "/audittrail")}
-                />
+                /> */}
                 <Item
                   title="Back up and Restore "
                   to="/backandrestore"

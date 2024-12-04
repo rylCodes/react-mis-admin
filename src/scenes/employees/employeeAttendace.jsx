@@ -121,7 +121,7 @@ const EmployeeAttendance = () => {
       headerName: "Action",
       flex: 1,
       renderCell: (params) => (
-        <Box display="flex" gap="9px" justifyContent="center">
+        <Box display="flex" gap="9px" alignItems={"center"} height={"100%"}>
           <Button
             variant="outlined"
             color="success"

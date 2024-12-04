@@ -13,6 +13,7 @@ import {
   Modal,
   Typography,
 } from "@mui/material";
+import PunchClockOutlinedIcon from "@mui/icons-material/PunchClockOutlined";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
@@ -295,10 +296,18 @@ const Employee = () => {
       headerName: "Action",
       flex: 1,
       renderCell: (params) => (
-        <Box display="flex" gap="9px" justifyContent="center">
+        <Box
+          display="flex"
+          gap="9px"
+          // justifyContent="center"
+          alignItems={"center"}
+          height={"100%"}
+          overflow={"auto"}
+        >
           <Button
             variant="outlined"
             color="info"
+            startIcon={<PunchClockOutlinedIcon />}
             onClick={() => handleAttendanceOpen(params.row)}
           >
             Attendance

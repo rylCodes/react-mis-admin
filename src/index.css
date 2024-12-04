@@ -36,7 +36,9 @@ body,
 
 @media print {
   /* Hide buttons when printing */
-  .print-button, .save-button, .cancel-button {
+  .print-button,
+  .save-button,
+  .cancel-button {
     display: none !important;
   }
 
