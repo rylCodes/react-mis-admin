@@ -182,6 +182,7 @@ const Employee = () => {
   };
 
   const handleUpdateEmployee = async () => {
+    setIsLoading(true);
     try {
       const position = positions.find(
         (position) => position.name === selectedEmployee.position
@@ -238,6 +239,7 @@ const Employee = () => {
     } catch (error) {
       console.error("Failed to update employee:", error);
       handleError();
+      setIsLoading(false);
     }
   };
 
@@ -493,7 +495,6 @@ const Employee = () => {
                         position: e.target.value,
                       })
                     }
-                    disabled={loading || positions.length === 0}
                   >
                     {positions.map((position) => (
                       <MenuItem key={position.id} value={position.name}>
@@ -506,8 +507,9 @@ const Employee = () => {
                   variant="contained"
                   color="primary"
                   onClick={handleUpdateEmployee}
+                  disabled={isLoading}
                 >
-                  Update Employee
+                  {isLoading ? "Updating" : "Update Employee"}
                 </Button>
               </Box>
             )}

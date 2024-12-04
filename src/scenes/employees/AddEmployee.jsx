@@ -108,6 +108,14 @@ const AddEmployee = ({ closeModal, onAddEmployee, positions }) => {
         required
       />
       <TextField
+        label="Password"
+        name="password"
+        value={employeeData.password}
+        onChange={handleChange}
+        required
+        type="password"
+      />
+      <TextField
         label="Address"
         name="address"
         value={employeeData.address}
