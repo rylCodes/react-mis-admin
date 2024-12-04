@@ -21,88 +21,46 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const [isFetching, setIsFetching] = useState(false);
-  const [transactions, setTransactions] = useState([]);
-  const [customers, setCustomers] = useState([]);
-  const [totalSales, setTotalSales] = useState(null);
-  const [monthlySales, setMonthlySales] = useState(null);
-  const [dailySales, setDailySales] = useState(null);
-  const [exercises, setExercises] = useState([]);
+  const [dashboardData, setDashboardData] = useState([]);
+  const [salesExercise, setSalesExercise] = useState([]);
+  const [maleFemale, setMaleFemale] = useState([]);
 
-  const fetchClients = async () => {
+  const fetchDashboardData = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/admin/show-client",
+        "http://localhost:8000/api/admin/dashboard",
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
           },
         }
       );
-      console.log(response.data.data);
-      if (response.status === 200) {
-        setCustomers(response.data.data);
-      } else {
-        console.error("Failed to fetch clients");
-      }
-    } catch (error) {
-      console.error("Error fetching clients:", error);
-    }
-  };
+      const dataResponse = response.data;
+      setDashboardData(dataResponse);
 
-  const fetchExercises = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:8000/api/admin/show-exercise",
+      const salesExerciseData = dataResponse["Sales_exercise"].map((item) => ({
+        service: item.name,
+        revenue: item.sales,
+      }));
+      setSalesExercise(salesExerciseData);
+
+      const maleFemaleData = [
         {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        setExercises(response.data.data);
-        console.log(response.data.data);
-      } else {
-        console.error("Failed to fetch exercises:", response);
-      }
-    } catch (error) {
-      console.error("Error fetching exercises:", error.message);
-    }
-  };
-
-  const fetchTransactions = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:8000/api/admin/exercise-transaction/show",
+          id: "female",
+          label: "female",
+          value: dataResponse.total_gender[0].female,
+          color: "hsl(162, 70%, 50%)",
+        },
         {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        }
-      );
-      if (response.status === 200) {
-        const clientTransactions = response.data.data;
-        const totalSalesAmount = clientTransactions.reduce(
-          (acc, client) => acc + parseFloat(client.total_price),
-          0
-        );
-        const monthly = clientTransactions.filter((client) =>
-          client.transactions.some((item) => item.tag === "monthly")
-        );
-        const daily = clientTransactions.filter((client) =>
-          client.transactions.some((item) => item.tag === "session")
-        );
-        setTotalSales(totalSalesAmount.toFixed(2));
-        setTransactions(clientTransactions);
-        setMonthlySales(monthly);
-        setDailySales(daily);
-      } else {
-        console.error("Failed to fetch transactions");
-      }
+          id: "male",
+          label: "male",
+          value: dataResponse.total_gender[0].male,
+          color: "hsl(344, 70%, 50%)",
+        },
+      ];
+      setMaleFemale(maleFemaleData);
     } catch (error) {
-      console.error("Error fetching transactions:", error);
-      setIsFetching(false);
+      console.error("Error fetching inventory data:", error);
     }
   };
 
@@ -110,18 +68,8 @@ const Dashboard = () => {
     if (!authToken) {
       navigate("/");
     } else {
-      setIsFetching(true);
-      try {
-        fetchClients();
-        fetchTransactions();
-        fetchExercises();
-        setIsFetching(false);
-      } catch (error) {
-        setIsFetching(false);
-        console.error(error);
-      }
+      fetchDashboardData();
     }
-    console.log(exercises);
   }, [authToken, navigate]);
 
   return (
@@ -148,7 +96,7 @@ const Dashboard = () => {
           justifyContent="center"
         >
           <StatBox
-            title={`${monthlySales?.length} `}
+            title={`${dashboardData.monthly_customer || ""} `}
             subtitle="Monthly"
             icon={
               <CalendarMonthOutlinedIcon
@@ -166,7 +114,7 @@ const Dashboard = () => {
           justifyContent="center"
         >
           <StatBox
-            title={`${dailySales?.length} `}
+            title={`${dashboardData.session_customer || ""} `}
             subtitle="Daily"
             icon={
               <PointOfSaleIcon
@@ -184,7 +132,10 @@ const Dashboard = () => {
           justifyContent="center"
         >
           <StatBox
-            title={`${customers?.length} `}
+            title={`${
+              dashboardData.session_customer + dashboardData.monthly_customer ||
+              ""
+            } `}
             subtitle="Guest"
             icon={
               <PersonAddIcon
@@ -193,12 +144,30 @@ const Dashboard = () => {
             }
           />
         </Box>
+      </Box>
 
-        {/* ROW 2 */}
+      <Box
+        marginTop={"2rem"}
+        display="flex"
+        gap={2}
+        sx={{
+          maxWidth: "100rem",
+          maxHeight: "500px",
+          flexDirection: {
+            md: "column",
+            lg: "row",
+          },
+        }}
+      >
         <Box
-          gridColumn="span 8"
-          gridRow="span 2"
           backgroundColor={colors.primary[400]}
+          sx={{
+            width: {
+              xs: "100%",
+              md: "100%",
+              lg: "60%",
+            },
+          }}
         >
           <Box
             mt="25px"
@@ -220,84 +189,34 @@ const Dashboard = () => {
                 fontWeight="bold"
                 color={colors.greenAccent[500]}
               >
-                ₱ {totalSales}
+                ₱ {dashboardData.total_sales}
               </Typography>
             </Box>
           </Box>
-          <Box height="250px" m="-20px 0 0 0">
-            <BarChart isDashboard={true} />
+
+          <Box height="100%" width={"100%"} m="-20px 0 0 0">
+            <BarChart isDashboard={true} salesExerciseData={salesExercise} />
           </Box>
         </Box>
 
+        {/* Pie Chart */}
         <Box
-          gridColumn="span 4"
-          gridRow="span 2"
           backgroundColor={colors.primary[400]}
-          p="30px"
-        >
-          <Typography variant="h5" fontWeight="600">
-            Event and Promo
-          </Typography>
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            mt="25px"
-          >
-            <Typography variant="h6" color={colors.greenAccent[500]}>
-              Upcoming Promotions
-            </Typography>
-            <Typography variant="body1" color={colors.grey[100]}>
-              Join us for exciting events and special offers this month!
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* ROW 3 */}
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
+          height="500px"
+          sx={{
+            width: {
+              xs: "100%",
+              md: "100%",
+              lg: "40%",
+            },
+          }}
+          maxWidth={"40rem"}
           p="30px"
         >
           <Typography variant="h5" fontWeight="600">
             Female and Male
           </Typography>
-          <PieChart isDashboard={true} />
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            mt="25px"
-          ></Box>
-        </Box>
-
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-          color={colors.grey[100]}
-        >
-          <Box
-            mt="20px"
-            p="0 25px"
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Box>
-              <Typography
-                variant="h5"
-                fontWeight="600"
-                color={colors.grey[100]}
-              >
-                Weekly and Monthly
-              </Typography>
-            </Box>
-          </Box>
-          <Box height="150px" m="-25px 4 2 0">
-            <HorizontalChart isDashboard={true} />
-          </Box>
+          <PieChart height={"100%"} isDashboard={true} />
         </Box>
       </Box>
     </Box>

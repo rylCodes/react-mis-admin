@@ -1,15 +1,15 @@
 import { useTheme } from "@mui/material";
 import { ResponsiveBar } from "@nivo/bar";
 import { tokens } from "../theme";
-import { mockBarData } from "../data/mockData";  // Ensure mockBarData is imported correctly
+import { mockBarData } from "../data/mockData"; // Ensure mockBarData is imported correctly
 
-const BarChart = ({ isDashboard = false }) => {
+const BarChart = ({ isDashboard = false, salesExerciseData }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   return (
     <ResponsiveBar
-      data={mockBarData}  // Using mockBarData from your mockData file
+      data={salesExerciseData} // Using mockBarData from your mockData file
       theme={{
         axis: {
           domain: {
@@ -38,8 +38,8 @@ const BarChart = ({ isDashboard = false }) => {
           },
         },
       }}
-      keys={["revenue"]}  // Ensure "revenue" is a key in your mockBarData
-      indexBy="service"  // Make sure "service" is a valid key in your mockBarData
+      keys={["revenue"]} // Ensure "revenue" is a key in your mockBarData
+      indexBy="service" // Make sure "service" is a valid key in your mockBarData
       margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
       padding={0.3}
       valueScale={{ type: "linear" }}
@@ -55,7 +55,7 @@ const BarChart = ({ isDashboard = false }) => {
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard ? undefined : "Service",  // X-axis label
+        legend: isDashboard ? undefined : "Service", // X-axis label
         legendPosition: "middle",
         legendOffset: 32,
       }}
@@ -63,7 +63,7 @@ const BarChart = ({ isDashboard = false }) => {
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard ? undefined : "Revenue ($)",  // Y-axis label
+        legend: isDashboard ? undefined : "Revenue ($)", // Y-axis label
         legendPosition: "middle",
         legendOffset: -40,
       }}
