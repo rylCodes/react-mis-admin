@@ -132,9 +132,9 @@ const InventoryTable = () => {
               <TableCell>
                 <b>Name</b>
               </TableCell>
-              <TableCell>
+              {/* <TableCell>
                 <b>Picture</b>
-              </TableCell>
+              </TableCell> */}
               <TableCell>
                 <b>Stock Level</b>
               </TableCell>
@@ -153,7 +153,7 @@ const InventoryTable = () => {
             {inventoryData?.map((inventory) => (
               <TableRow key={inventory.id}>
                 <TableCell>{inventory.name}</TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <img
                     src={inventory.picture || "https://via.placeholder.com/100"}
                     alt={inventory.name}
@@ -164,7 +164,7 @@ const InventoryTable = () => {
                       maxWidth: "100%",
                     }}
                   />
-                </TableCell>
+                </TableCell> */}
                 <TableCell
                   sx={{
                     color: getStockLevelColor(inventory.quantity),

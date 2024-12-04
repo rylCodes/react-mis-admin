@@ -133,9 +133,9 @@ const EquipmentTable = () => {
               <TableCell>
                 <b>Name</b>
               </TableCell>
-              <TableCell>
+              {/* <TableCell>
                 <b>Picture</b>
-              </TableCell>
+              </TableCell> */}
               <TableCell>
                 <b>Stock Level</b>
               </TableCell>
@@ -154,7 +154,7 @@ const EquipmentTable = () => {
             {equipmentData.map((equipment) => (
               <TableRow key={equipment.id}>
                 <TableCell>{equipment.name}</TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <img
                     src={equipment.picture || "https://via.placeholder.com/100"}
                     alt={equipment.name}
@@ -165,7 +165,7 @@ const EquipmentTable = () => {
                       maxWidth: "100%",
                     }}
                   />
-                </TableCell>
+                </TableCell> */}
                 <TableCell
                   sx={{
                     color: getStockLevelColor(equipment.quantity),
