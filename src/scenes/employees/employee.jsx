@@ -299,10 +299,9 @@ const Employee = () => {
         <Box
           display="flex"
           gap="9px"
-          // justifyContent="center"
+          justifyContent="center"
           alignItems={"center"}
           height={"100%"}
-          overflow={"auto"}
         >
           <Button
             variant="outlined"
