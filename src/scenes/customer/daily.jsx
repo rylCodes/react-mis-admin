@@ -186,7 +186,10 @@ const Daily = () => {
 
   return (
     <Box m="20px">
-      <Header title="Customer" subtitle="Managing the Customer Members" />
+      <Header
+        title="Daily Sales"
+        subtitle="Monitor sales from daily-session customers"
+      />
       <Box
         m="40px 0 0 0"
         height="75vh"

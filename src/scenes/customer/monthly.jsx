@@ -192,7 +192,10 @@ const Monthly = () => {
 
   return (
     <Box m="20px">
-      <Header title="Customer" subtitle="Managing the Customer Members" />
+      <Header
+        title="Monthly Sales"
+        subtitle="Monitor sales from monthly-session customers"
+      />
       <Box
         m="40px 0 0 0"
         height="75vh"
