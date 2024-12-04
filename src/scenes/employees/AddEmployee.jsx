@@ -12,9 +12,11 @@ import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
 import { useAlert } from "../../context/AlertContext";
 
-const AddEmployee = ({ closeModal, onAddEmployee, loading, positions }) => {
+const AddEmployee = ({ closeModal, onAddEmployee, positions }) => {
   const { authToken } = useContext(AuthContext);
   const showAlert = useAlert();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSuccess = () => {
     showAlert(`Employee successfully added.`, "success");
@@ -45,6 +47,7 @@ const AddEmployee = ({ closeModal, onAddEmployee, loading, positions }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const response = await axios.post(
         "http://localhost:8000/api/admin/store-staff",
@@ -60,10 +63,12 @@ const AddEmployee = ({ closeModal, onAddEmployee, loading, positions }) => {
         onAddEmployee(response.data.data); // Pass the new staff to the parent component
         closeModal(); // Close the modal
         handleSuccess();
+        setIsLoading(false);
       }
     } catch (error) {
       console.error(error);
       handleError();
+      setIsLoading(false);
     }
   };
 
@@ -92,6 +97,7 @@ const AddEmployee = ({ closeModal, onAddEmployee, loading, positions }) => {
         name="contact_no"
         value={employeeData.contact_no}
         onChange={handleChange}
+        inputProps={{ maxLength: 11 }}
         required
       />
       <TextField
@@ -139,12 +145,10 @@ const AddEmployee = ({ closeModal, onAddEmployee, loading, positions }) => {
           name="position_id"
           value={employeeData.position_id}
           onChange={handleChange}
-          disabled={loading || positions.length === 0}
         >
           {positions.map((position) => (
             <MenuItem key={position.id} value={position.id}>
-              {position.name}{" "}
-              {/* Adjust `position.name` if the field name is different */}
+              {position.name}
             </MenuItem>
           ))}
         </Select>
@@ -154,9 +158,9 @@ const AddEmployee = ({ closeModal, onAddEmployee, loading, positions }) => {
         type="submit"
         variant="contained"
         color="primary"
-        disabled={loading}
+        disabled={isLoading}
       >
-        {loading ? "Loading..." : "Add Employee"}
+        {isLoading ? "Loading..." : "Add Employee"}
       </Button>
     </Box>
   );

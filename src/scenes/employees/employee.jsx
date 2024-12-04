@@ -378,7 +378,6 @@ const Employee = () => {
             <AddEmployee
               closeModal={handleClose}
               onAddEmployee={handleAddEmployee}
-              loading={loading}
               positions={positions}
             />
           </DialogContent>
