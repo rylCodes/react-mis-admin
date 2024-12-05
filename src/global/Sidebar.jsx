@@ -280,13 +280,13 @@ const Sidebar = () => {
             )}
 
             {/* Profile */}
-            <Item
+            {/* <Item
               title="Profile"
               to="/profile"
               icon={<AccountBoxIcon />}
               selected={selected === "/profile"}
               setSelected={() => handleSelect("Profile", "/profile")}
-            />
+            /> */}
 
             {/*Settings */}
             <Item
