@@ -100,7 +100,7 @@ const servicesOffered = () => {
       setExerciseId(selectedExercise.id);
       setPrice(selectedExercise.price || "");
       setName(selectedExercise.name || "");
-      setPlan(selectedExercise.plan || "session");
+      setPlan(selectedExercise.tag || "session");
       setDescription(selectedExercise.short_description || "");
     } else {
       setExerciseId(null);
@@ -238,7 +238,7 @@ const servicesOffered = () => {
         )}
 
         {/* Price Input */}
-        <Grid container spacing={2}>
+        <Grid container spacing={2} marginTop={0.125}>
           <Grid item xs={12}>
             <TextField
               label="Price"
@@ -251,7 +251,7 @@ const servicesOffered = () => {
         </Grid>
 
         {/* Plan Input */}
-        <Grid container spacing={2}>
+        <Grid container spacing={2} marginTop={0.125}>
           <Grid item xs={12}>
             <TextField
               select
@@ -268,7 +268,7 @@ const servicesOffered = () => {
         </Grid>
 
         {/* Description Input */}
-        <Grid container spacing={2}>
+        <Grid container spacing={2} marginTop={0.125}>
           <Grid item xs={12}>
             <TextField
               label="Description"
