@@ -21,7 +21,7 @@ import Daily from "./scenes/customer/daily.jsx";
 import Monthly from "./scenes/customer/monthly.jsx";
 import InventoryForm from "./scenes/inventory/inventoryForm.jsx";
 import EquipmentTable from "./scenes/inventory/equipmentTable.jsx";
-import InventoryTable from "./scenes/inventory/inventoryTable.jsx";
+import SupplementTable from "./scenes/inventory/supplementTable.jsx";
 import Report from "./scenes/inventory/report.jsx";
 import CustomerArchive from "./scenes/customer/customerArchive.jsx";
 import AccountSettings from "./scenes/settings/accountSettings.jsx";
@@ -103,8 +103,8 @@ function ContentLayout({ isSidebar, setIsSidebar }) {
           <Route path="/employeeAttendance" element={<EmployeeAttendance />} />
           <Route path="/employeearchive" element={<EmployeeArchive />} />
           <Route path="/inventoryform" element={<InventoryForm />} />
-          <Route path="/equipmentTable" element={<EquipmentTable />} />
-          <Route path="/inventory-table" element={<InventoryTable />} />
+          <Route path="/equipment-table" element={<EquipmentTable />} />
+          <Route path="/supplement-table" element={<SupplementTable />} />
           <Route path="/report" element={<Report />} />
           <Route path="/payroll-list" element={<PayrollList />} />
           <Route path="/payroll-form" element={<PayrollForm />} />

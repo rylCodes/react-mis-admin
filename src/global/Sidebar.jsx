@@ -255,18 +255,18 @@ const Sidebar = () => {
                 />
                 <Item
                   title="Equipment Table"
-                  to="/equipmenttable"
-                  selected={selected === "/equipmentTable"}
+                  to="/equipment-table"
+                  selected={selected === "/equipment-table"}
                   setSelected={() =>
-                    handleSelect("Equipment Table", "/equipmentTable")
+                    handleSelect("Equipment Table", "/equipment-table")
                   }
                 />
                 <Item
-                  title="Inventory Table"
-                  to="/inventory-table"
-                  selected={selected === "/inventory-table"}
+                  title="Supplement Table"
+                  to="/supplement-table"
+                  selected={selected === "/supplement-table"}
                   setSelected={() =>
-                    handleSelect("Inventory Table", "/inventory-table")
+                    handleSelect("Supplement Table", "/supplement-table")
                   }
                 />
 

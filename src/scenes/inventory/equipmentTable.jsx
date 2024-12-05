@@ -123,7 +123,7 @@ const EquipmentTable = () => {
   return (
     <Box sx={{ padding: 3 }}>
       <Header
-        title="Equipment"
+        title="Equipments"
         subtitle="Manage and track equipment inventory"
       />
       <TableContainer
