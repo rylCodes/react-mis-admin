@@ -26,6 +26,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAlert } from "../../context/AlertContext";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const InventoryTable = () => {
   const theme = useTheme();
@@ -35,12 +36,15 @@ const InventoryTable = () => {
   const showAlert = useAlert();
   const navigate = useNavigate();
 
-  const handleUpdateSuccess = () => {
-    showAlert(`Inventory successfully updated.`, "success");
+  const handleSuccess = (message) => {
+    showAlert(message || `Inventory successfully updated.`, "success");
   };
 
-  const handleError = () => {
-    showAlert("An error occurred while updating the inventory!", "error");
+  const handleError = (message) => {
+    showAlert(
+      message || "An error occurred while updating the inventory!",
+      "error"
+    );
   };
 
   const [inventoryData, setInventoryData] = useState([]);
@@ -51,26 +55,6 @@ const InventoryTable = () => {
     if (!authToken) {
       navigate("/");
     } else {
-      const fetchInventoryData = async () => {
-        try {
-          const response = await axios.get(
-            "http://localhost:8000/api/admin/show-inventory",
-            {
-              headers: {
-                Authorization: `Bearer ${authToken}`,
-              },
-            }
-          );
-          const inventories = response.data.data.filter(
-            (item) => item.type === "supplement"
-          );
-          setInventoryData(inventories);
-          console.log(inventories);
-        } catch (error) {
-          console.error("Error fetching inventory data:", error);
-        }
-      };
-
       fetchInventoryData();
     }
   }, [authToken, navigate]);
@@ -88,6 +72,26 @@ const InventoryTable = () => {
     });
   };
 
+  const fetchInventoryData = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/admin/show-inventory",
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      const inventories = response.data.data.filter(
+        (item) => item.type === "supplement"
+      );
+      setInventoryData(inventories);
+      console.log(inventories);
+    } catch (error) {
+      console.error("Error fetching inventory data:", error);
+    }
+  };
+
   const handleEditSubmit = async () => {
     try {
       const response = await axios.post(
@@ -102,14 +106,37 @@ const InventoryTable = () => {
       console.log("Inventory updated successfully:", response.data);
       setEditModalOpen(false);
       // Refresh the inventory data
-      const updatedInventoryData = inventoryData.map((item) =>
-        item.id === currentItem.id ? response.data.data : item
-      );
-      setInventoryData(updatedInventoryData);
-      handleUpdateSuccess();
+      fetchInventoryData();
+      handleSuccess();
     } catch (error) {
       console.error("Error updating inventory:", error);
       handleError();
+    }
+  };
+
+  const handleDelete = async (inventory) => {
+    if (
+      confirm(
+        "Do you really want to delete this item? This action cannot be undone!"
+      )
+    ) {
+      try {
+        const response = await axios.post(
+          `http://localhost:8000/api/admin/soft-delete-inventory/${inventory.id}`,
+          null,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+        console.log("Inventory deleted successfully:", response.data);
+        fetchInventoryData();
+        handleSuccess("Item successfully deleted.");
+      } catch (error) {
+        console.error("Error updating inventory:", error);
+        handleError("Error: Failed to delete the item!");
+      }
     }
   };
 
@@ -185,15 +212,26 @@ const InventoryTable = () => {
                 </TableCell>
                 <TableCell>{inventory.price}</TableCell>
                 <TableCell>
-                  <Tooltip title="Edit this equipment" arrow>
+                  <Tooltip title="Edit this item" arrow>
                     <Button
-                      variant="contained"
+                      variant="outlined"
                       color="secondary"
                       startIcon={<EditOutlinedIcon />}
                       onClick={() => handleEdit(inventory)}
                       sx={{ marginRight: 1 }}
                     >
                       Edit
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title="Delete this item" arrow>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => handleDelete(inventory)}
+                      sx={{ marginRight: 1 }}
+                    >
+                      Delete
                     </Button>
                   </Tooltip>
                 </TableCell>
