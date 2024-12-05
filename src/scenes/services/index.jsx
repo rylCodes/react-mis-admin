@@ -209,7 +209,7 @@ const servicesOffered = () => {
         </Typography>
 
         {/* Image Input */}
-        <Grid container spacing={2} sx={{ marginBottom: 3 }}>
+        {/*<Grid container spacing={2} sx={{ marginBottom: 3 }}>
           <Grid item xs={12} md={6}>
             <Typography variant="body2">
               Please upload an image (.jpg, .png only)
@@ -221,7 +221,7 @@ const servicesOffered = () => {
               aria-label="Upload image"
             />
           </Grid>
-        </Grid>
+        </Grid>*/}
 
         {!exerciseId && (
           <Grid container spacing={2}>
