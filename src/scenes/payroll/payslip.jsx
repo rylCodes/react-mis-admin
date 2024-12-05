@@ -174,7 +174,10 @@ const PaySlip = ({ selectedEmployee, handlePayslipClose }) => {
               >
                 Name of Employee: {selectedEmployee.name}
               </Typography>
-              <Typography>Employee No.#: {selectedEmployee.name}</Typography>
+              <Typography color="primary" paddingLeft={"1rem"}>
+                Employee No.#:{" "}
+                {"EMP" + selectedEmployee.id.toString().padStart(3, "0")}
+              </Typography>
             </Grid>
             <Grid item xs={6}>
               <Typography
@@ -242,7 +245,9 @@ const PaySlip = ({ selectedEmployee, handlePayslipClose }) => {
                         align="right"
                         sx={{ color: "#333", padding: "8px 16px" }}
                       >
-                        {selectedEmployee.overtime}
+                        {selectedEmployee.overtime ||
+                          selectedEmployee.over_time ||
+                          ""}
                       </TableCell>
                       <TableCell
                         align="right"

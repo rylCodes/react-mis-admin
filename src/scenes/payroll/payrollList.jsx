@@ -45,6 +45,7 @@ const PayrollList = () => {
         position: staff.position,
       }));
       setStaffs(formattedData);
+      console.log(formattedData);
     } catch (error) {
       console.error("Failed to fetch employees:", error);
     }
@@ -113,6 +114,7 @@ const PayrollList = () => {
       ...prevEmployees,
       { id: prevEmployees.length + 1, ...newEmployee }, // Adding new employee data
     ]);
+    // fetchPayrollData()
   };
 
   const handleViewPayslip = (employee = null) => {
@@ -124,8 +126,8 @@ const PayrollList = () => {
     { field: "id", headerName: "Employee ID" },
     { field: "name", headerName: "Name", flex: 1 },
     { field: "present_day", headerName: "Present Days", flex: 1 },
-    { field: "salary", headerName: "Salary", flex: 1 },
-    { field: "overtime", headerName: "Overtime", flex: 1 },
+    { field: "total_salary", headerName: "Salary", flex: 1 },
+    { field: "overtime" || "over_time", headerName: "Overtime", flex: 1 },
     { field: "yearly_bonus", headerName: "Yearly Bonus", flex: 1 },
     { field: "sales_comission", headerName: "Sales Commission", flex: 1 },
     { field: "incentives", headerName: "Incentives", flex: 1 },
