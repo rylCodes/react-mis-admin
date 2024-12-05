@@ -109,7 +109,7 @@ const InventoryForm = () => {
           sx={{ mb: 2 }}
         >
           <Tab label="Item" />
-          <Tab label="Upload Image" />
+          {/* <Tab label="Upload Image" /> */}
         </Tabs>
 
         {tabValue === 0 && (
