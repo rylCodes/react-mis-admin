@@ -122,7 +122,10 @@ const EquipmentTable = () => {
 
   return (
     <Box sx={{ padding: 3 }}>
-      <Header title="Equipment" subtitle="Manage and Track Inventory Levels" />
+      <Header
+        title="Equipment"
+        subtitle="Manage and track equipment inventory"
+      />
       <TableContainer
         component={Paper}
         sx={{ backgroundColor: colors.primary[400] }}
