@@ -30,7 +30,7 @@ const AddCustomer = ({ closeModal, onAddCustomer }) => {
     firstname: "",
     lastname: "",
     email: "",
-    password: "",
+    password: "password",
     address: "",
     gender: "",
     contact_no: "",
@@ -100,14 +100,14 @@ const AddCustomer = ({ closeModal, onAddCustomer }) => {
         onChange={handleChange}
         required
       />
-      <TextField
+      {/* <TextField
         label="Password"
         name="password"
         type="password"
         value={clientData.password}
         onChange={handleChange}
         required
-      />
+      /> */}
       <TextField
         label="Address"
         name="address"

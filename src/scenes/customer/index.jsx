@@ -223,19 +223,19 @@ const CustomerList = () => {
         >
           <Button
             variant="outlined"
-            color="inherit"
-            startIcon={<ArchiveOutlinedIcon />}
-            onClick={() => handleArchive(params.row.id)}
-          >
-            Archive
-          </Button>
-          <Button
-            variant="outlined"
             color="success"
             startIcon={<EditOutlinedIcon />}
             onClick={() => handleUpdateOpen(params.row)}
           >
             Update
+          </Button>
+          <Button
+            variant="outlined"
+            color="inherit"
+            startIcon={<ArchiveOutlinedIcon />}
+            onClick={() => handleArchive(params.row.id)}
+          >
+            Archive
           </Button>
         </Box>
       ),
@@ -340,7 +340,7 @@ const CustomerList = () => {
                     })
                   }
                 />
-                <TextField
+                {/* <TextField
                   fullWidth
                   label="Password"
                   margin="normal"
@@ -352,7 +352,7 @@ const CustomerList = () => {
                       password: e.target.value,
                     })
                   }
-                />
+                /> */}
                 <TextField
                   fullWidth
                   label="Address"
