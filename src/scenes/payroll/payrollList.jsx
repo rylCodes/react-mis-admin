@@ -10,13 +10,27 @@ import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Payslip from "./payslip";
+import { useAlert } from "../../context/AlertContext";
 
 const PayrollList = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const { authToken } = useContext(AuthContext);
+  const showAlert = useAlert();
   const navigate = useNavigate();
+
+  const handleUpdateSuccess = () => {
+    showAlert(`Payroll successfully updated.`, "success");
+  };
+
+  const handleArchiveSuccess = () => {
+    showAlert(`Payroll successfully archived.`, "success");
+  };
+
+  const handleError = () => {
+    showAlert("An error occurred!", "error");
+  };
 
   const [AddEmployeeOpen, setAddEmployeeOpen] = useState(false);
   const [staffs, setStaffs] = useState([]);
@@ -102,19 +116,41 @@ const PayrollList = () => {
     setPayslipOpen(false);
   };
 
-  const handleArchive = (id) => {
-    // Archive employee logic
+  const handleArchive = async (id) => {
     setEmployees((prevEmployees) =>
       prevEmployees.filter((employee) => employee.id !== id)
     );
+
+    try {
+      const userConfirmed = confirm(
+        "Do you want to move this customer to archive?"
+      );
+      if (!userConfirmed) return;
+
+      const response = await axios.post(
+        `http://localhost:8000/api/admin/soft-delete-payroll/${id}`,
+        null, // No payload needed
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        handleArchiveSuccess();
+        fetchPayrollData();
+      } else {
+        handleError();
+      }
+    } catch (error) {
+      console.error("Error deleting payroll data:", error);
+      handleError();
+    }
   };
 
   const handleAddEmployee = (newEmployee) => {
-    setEmployees((prevEmployees) => [
-      ...prevEmployees,
-      { id: prevEmployees.length + 1, ...newEmployee }, // Adding new employee data
-    ]);
-    // fetchPayrollData()
+    fetchPayrollData();
   };
 
   const handleViewPayslip = (employee = null) => {
@@ -142,7 +178,20 @@ const PayrollList = () => {
       headerName: "Action",
       flex: 1,
       renderCell: (params) => (
-        <Box display="flex" gap="9px" justifyContent="center">
+        <Box
+          display="flex"
+          alignItems={"center"}
+          height={"100%"}
+          gap="9px"
+          justifyContent="center"
+        >
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => handleViewPayslip(params.row)}
+          >
+            View Payslip
+          </Button>
           <Button
             variant="outlined"
             color="inherit"
@@ -150,13 +199,6 @@ const PayrollList = () => {
             onClick={() => handleArchive(params.row.id)}
           >
             Archive
-          </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={() => handleViewPayslip(params.row)}
-          >
-            View Payslip
           </Button>
         </Box>
       ),
