@@ -24,6 +24,7 @@ import axios from "axios"; // For API requests
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { useAlert } from "../../context/AlertContext";
+import { generateRandomPassword } from "../../services/utils";
 
 const Employee = () => {
   const theme = useTheme();
@@ -32,6 +33,75 @@ const Employee = () => {
   const { authToken } = useContext(AuthContext);
   const showAlert = useAlert();
   const navigate = useNavigate();
+
+  const [AddEmployeeOpen, setAddEmployeeOpen] = useState(false);
+  const [EditEmployeeOpen, setEditEmployeeOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const [employees, setEmployees] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [adminId, setAdminId] = useState(1);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const [attendanceModalOpen, setAttendanceModalOpen] = useState(false);
+  const [attendanceData, setAttendanceData] = useState({
+    attendance: "present",
+    date: new Date().toISOString().split("T")[0], // Default to today
+  });
+
+  const [positions, setPositions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
+
+  // Fetch employees from the backend
+  useEffect(() => {
+    setIsFetching(true);
+    const initializeData = async () => {
+      try {
+        await fetchPositions();
+        await fetchEmployees();
+        setIsFetching(false);
+      } catch (error) {
+        console.error("Error", error);
+        setIsFetching(false);
+      }
+    };
+
+    initializeData();
+  }, []);
+
+  useEffect(() => {
+    const adminPosition = positions.find(
+      (position) => position.name.toLowerCase() === "admin"
+    );
+    if (adminPosition) {
+      setAdminId(adminPosition.id);
+    }
+  }, [positions]);
+
+  useEffect(() => {
+    if (selectedEmployee) {
+      const position = getPositionObject(selectedEmployee.position);
+      if (position && position.id !== adminId) {
+        setSelectedEmployee((prevData) => ({
+          ...prevData,
+          password: generateRandomPassword(),
+        }));
+        setIsAdmin(false);
+      } else if (position && position.id === adminId) {
+        setIsAdmin(true);
+        setSelectedEmployee((prevData) => ({
+          ...prevData,
+          password: "",
+        }));
+      }
+    }
+  }, [selectedEmployee && selectedEmployee.position]);
 
   const handleUpdateSuccess = () => {
     showAlert(`Employee successfully updated.`, "success");
@@ -48,28 +118,6 @@ const Employee = () => {
   const handleError = () => {
     showAlert("An error occurred!", "error");
   };
-
-  useEffect(() => {
-    if (!authToken) {
-      navigate("/");
-    }
-  }, [authToken, navigate]);
-
-  const [AddEmployeeOpen, setAddEmployeeOpen] = useState(false);
-  const [EditEmployeeOpen, setEditEmployeeOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
-  const [employees, setEmployees] = useState([]);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
-
-  const [attendanceModalOpen, setAttendanceModalOpen] = useState(false);
-  const [attendanceData, setAttendanceData] = useState({
-    attendance: "present",
-    date: new Date().toISOString().split("T")[0], // Default to today
-  });
-
-  const [positions, setPositions] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   const fetchEmployees = async () => {
     try {
@@ -113,29 +161,32 @@ const Employee = () => {
     }
   };
 
-  // Fetch employees from the backend
-  useEffect(() => {
-    setIsFetching(true);
-    const initializeData = async () => {
-      try {
-        await fetchPositions();
-        await fetchEmployees();
-        setIsFetching(false);
-      } catch (error) {
-        console.error("Error", error);
-        setIsFetching(false);
-      }
-    };
-
-    initializeData();
-  }, []);
-
   const handleOpen = () => setAddEmployeeOpen(true);
   const handleClose = () => setAddEmployeeOpen(false);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSelectedEmployee((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+
+    if (name === "position_id" && value != adminId) {
+      setIsAdmin(false);
+      setSelectedEmployee((prevData) => ({
+        ...prevData,
+        password: generateRandomPassword(),
+      }));
+    } else if (name === "position_id" && value == adminId) {
+      setIsAdmin(true);
+      setSelectedEmployee((prevData) => ({
+        ...prevData,
+        password: "",
+      }));
+    }
+  };
+
   const handleEditOpen = (employee) => {
-    console.log(employee);
-    console.log("positions", positions);
     const [firstname, ...lastname] = employee.name.split(" ");
     setSelectedEmployee({
       ...employee,
@@ -181,13 +232,18 @@ const Employee = () => {
     }
   };
 
+  const getPositionObject = (positionName) => {
+    const position = positions.find(
+      (position) => position.name === positionName
+    );
+
+    return position;
+  };
+
   const handleUpdateEmployee = async () => {
     setIsLoading(true);
+    const position = getPositionObject(selectedEmployee.position);
     try {
-      const position = positions.find(
-        (position) => position.name === selectedEmployee.position
-      );
-
       const response = await axios.post(
         `http://localhost:8000/api/admin/update-staff/${selectedEmployee.id}`,
         {
@@ -206,29 +262,10 @@ const Employee = () => {
           },
         }
       );
-      setEmployees((prevEmployees) =>
-        prevEmployees.map((employee) =>
-          employee.id === selectedEmployee.id ? response.data.data : employee
-        )
-      );
+
       handleEditClose();
-      console.log(response.status);
-
       if (response.status === 200) {
-        // Update local state after successful API update
-        const updatedEmployees = {
-          ...selectedEmployee,
-          name: selectedEmployee.firstname + " " + selectedEmployee.lastname,
-          sex: selectedEmployee.gender,
-          password: "",
-        };
-
-        setEmployees((prevEmployees) =>
-          prevEmployees.map((e) =>
-            e.id === selectedEmployee.id ? updatedEmployees : e
-          )
-        );
-
+        fetchEmployees();
         handleEditClose();
         setIsLoading(false);
         handleUpdateSuccess();
@@ -434,27 +471,6 @@ const Employee = () => {
                   }
                 />
                 <TextField
-                  label="Password"
-                  type="password"
-                  value={selectedEmployee.password}
-                  onChange={(e) =>
-                    setSelectedEmployee({
-                      ...selectedEmployee,
-                      password: e.target.value,
-                    })
-                  }
-                />
-                <TextField
-                  label="Address"
-                  value={selectedEmployee.address}
-                  onChange={(e) =>
-                    setSelectedEmployee({
-                      ...selectedEmployee,
-                      address: e.target.value,
-                    })
-                  }
-                />
-                <TextField
                   label="Contact No"
                   value={selectedEmployee.phone}
                   onChange={(e) =>
@@ -498,11 +514,24 @@ const Employee = () => {
                   >
                     {positions.map((position) => (
                       <MenuItem key={position.id} value={position.name}>
-                        {position.name}{" "}
+                        {position.name}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
+                {isAdmin && (
+                  <TextField
+                    label="Password"
+                    type="password"
+                    value={selectedEmployee.password}
+                    onChange={(e) =>
+                      setSelectedEmployee({
+                        ...selectedEmployee,
+                        password: e.target.value,
+                      })
+                    }
+                  />
+                )}
                 <Button
                   variant="contained"
                   color="primary"

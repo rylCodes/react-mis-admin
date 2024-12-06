@@ -11,12 +11,52 @@ import {
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
 import { useAlert } from "../../context/AlertContext";
+import { generateRandomPassword } from "../../services/utils";
 
 const AddEmployee = ({ closeModal, onAddEmployee, positions }) => {
   const { authToken } = useContext(AuthContext);
   const showAlert = useAlert();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [adminId, setAdminId] = useState(1);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [employeeData, setEmployeeData] = useState({
+    firstname: "",
+    lastname: "",
+    gender: "",
+    contact_no: "",
+    email: "",
+    address: "",
+    position_id: 1,
+    password: "",
+  });
+
+  useEffect(() => {
+    const adminPosition = positions.find(
+      (position) => position.name.toLowerCase() === "admin"
+    );
+    if (adminPosition) {
+      setAdminId(adminPosition.id);
+    }
+
+    console.log(positions);
+  }, [positions]);
+
+  useEffect(() => {
+    if (employeeData.position_id != adminId) {
+      setEmployeeData((prevData) => ({
+        ...prevData,
+        password: generateRandomPassword(),
+      }));
+      setIsAdmin(false);
+    } else if (employeeData.position_id == adminId) {
+      setIsAdmin(true);
+      setEmployeeData((prevData) => ({
+        ...prevData,
+        password: "",
+      }));
+    }
+  }, [employeeData.position_id]);
 
   const handleSuccess = () => {
     showAlert(`Employee successfully added.`, "success");
@@ -26,23 +66,26 @@ const AddEmployee = ({ closeModal, onAddEmployee, positions }) => {
     showAlert("An error occurred while adding the employee!", "error");
   };
 
-  const [employeeData, setEmployeeData] = useState({
-    firstname: "",
-    lastname: "",
-    gender: "",
-    contact_no: "",
-    email: "",
-    address: "",
-    position_id: "",
-    password: "",
-  });
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEmployeeData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
+
+    if (name === "position_id" && value != adminId) {
+      setIsAdmin(false);
+      setEmployeeData((prevData) => ({
+        ...prevData,
+        password: generateRandomPassword(),
+      }));
+    } else if (name === "position_id" && value == adminId) {
+      setIsAdmin(true);
+      setEmployeeData((prevData) => ({
+        ...prevData,
+        password: "",
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -85,6 +128,7 @@ const AddEmployee = ({ closeModal, onAddEmployee, positions }) => {
         onChange={handleChange}
         required
       />
+
       <TextField
         label="Last Name"
         name="lastname"
@@ -92,6 +136,15 @@ const AddEmployee = ({ closeModal, onAddEmployee, positions }) => {
         onChange={handleChange}
         required
       />
+
+      <TextField
+        label="Address"
+        name="address"
+        value={employeeData.address}
+        onChange={handleChange}
+        required
+      />
+
       <TextField
         label="Contact Number"
         name="contact_no"
@@ -99,26 +152,13 @@ const AddEmployee = ({ closeModal, onAddEmployee, positions }) => {
         onChange={handleChange}
         inputProps={{ maxLength: 11 }}
         required
+        type="number"
       />
+
       <TextField
         label="Email"
         name="email"
         value={employeeData.email}
-        onChange={handleChange}
-        required
-      />
-      <TextField
-        label="Password"
-        name="password"
-        value={employeeData.password}
-        onChange={handleChange}
-        required
-        type="password"
-      />
-      <TextField
-        label="Address"
-        name="address"
-        value={employeeData.address}
         onChange={handleChange}
         required
       />
@@ -152,6 +192,17 @@ const AddEmployee = ({ closeModal, onAddEmployee, positions }) => {
           ))}
         </Select>
       </FormControl>
+
+      {isAdmin && (
+        <TextField
+          label="Password"
+          name="password"
+          value={employeeData.password}
+          onChange={handleChange}
+          required
+          type="password"
+        />
+      )}
 
       <Button
         type="submit"
